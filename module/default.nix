@@ -11,7 +11,7 @@ in
     packages = mkOption {
       type = types.listOf types.str;
       default = [];
-      example = [ "org.kde.index" "org.kde.kalendar" ];
+      example = [ "org.kde.index" "org.kde.kdenlive" ];
       description = ''
         Which packages to install.
       '';
@@ -26,7 +26,6 @@ in
     postInitCommand = mkOption {
       type = types.nullOr types.str;
       default = null;
-      example = "flatpak install org.foo.bar";
       description = ''
         Which command(s) to run after installation.
       '';
