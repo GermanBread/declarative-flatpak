@@ -62,6 +62,7 @@ in
             fi
           done
           flatpak uninstall --system --unused -y
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           for i in ${builtins.toString cfg.packages}; do
             flatpak install --system --or-update -y $i
           done
