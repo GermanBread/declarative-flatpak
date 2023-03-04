@@ -12,7 +12,7 @@
 {
   inputs = {
     # ...
-    flatpaks.url = "github:GermanBread/declarative-flatpaks/stable";
+    flatpaks.url = "github:GermanBread/declarative-flatpak/stable";
     # ...
   };
 
