@@ -34,6 +34,7 @@ in
 
   config = {
     systemd.services."manage-system-flatpaks" = {
+      description = "Manage system-wide flatpaks";
       after = [
         "network-online.target"
       ];

@@ -19,6 +19,27 @@
     xdg-desktop-portal-kde
   ];
 
+  nixos-shell.mounts = {
+    mountHome = false;
+    mountNixProfile = false;
+  };
+
+  environment.loginShellInit = ''
+    trap 'poweroff' EXIT
+  '';
+
+  users.users."root".shell = pkgs.zsh;
+
+  programs.zsh = {
+    enable = true;
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable = true;
+    ohMyZsh = {
+      enable = true;
+      theme = "flazz";
+    };
+  };
+
   networking.networkmanager.enable = true;
 
   system.stateVersion = "22.05";
