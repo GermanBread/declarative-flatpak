@@ -2,8 +2,8 @@
   description = "Global FHS environment for your daily computing needs.";
 
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-22.11;
-    utils.url = github:numtide/flake-utils;
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    utils.url = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, utils }: utils.lib.eachDefaultSystem (system: let 

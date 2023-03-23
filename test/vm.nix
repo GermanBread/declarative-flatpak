@@ -15,9 +15,13 @@
     diskSize = 10 * 1024;
   };
 
-  xdg.portal.extraPortals = with pkgs; [
-    xdg-desktop-portal-kde
-  ];
+  services.flatpak.enable = true;
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-kde
+    ];
+  };
 
   nixos-shell.mounts = {
     mountHome = false;

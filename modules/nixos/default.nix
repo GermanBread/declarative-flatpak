@@ -74,7 +74,11 @@ in
       '';
     };
 
-    xdg.portal.enable = true;
-    services.flatpak.enable = true;
+    assertions = [
+      {
+        assertion = cfg.enable;
+        message = "This flatpak module is useless if flatpaks are disabled in your config.";
+      }
+    ];
   };
 }
