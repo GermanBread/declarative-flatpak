@@ -16,6 +16,14 @@ in
         Which packages to install.
       '';
     };
+    remotes = mkOption {
+      type = types.listOf types.str;
+      default = [ "flathub https://flathub.org/repo/flathub.flatpakrepo" ];
+      example = [ "repo-name https://example.org/repo.flatpakrepo" ];
+      description = ''
+        Flatpak remotes to add. Flathub is enabled by default.
+      '';
+    };
     preInitCommand = mkOption {
       type = types.nullOr types.str;
       default = null;
@@ -68,6 +76,9 @@ in
         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         for i in ${builtins.toString cfg.packages}; do
           flatpak install --user --noninteractive --or-update $i
+        done
+        for i in ${builtins.toString cfg.remotes}; do
+          flatpak remote-add --user --if-not-exists $i
         done
         ${if cfg.postInitCommand != null then cfg.postInitCommand else "true"}
       '';
