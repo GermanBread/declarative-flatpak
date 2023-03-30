@@ -72,11 +72,19 @@ in
             flatpak uninstall --user --noninteractive $r
           fi
         done
+
         flatpak uninstall --user --unused --noninteractive
         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         for i in ${builtins.toString cfg.packages}; do
           flatpak install --user --noninteractive --or-update $i
         done
+
+        flatpak remotes --columns=name,url --user | while read r; do
+          if ! elem $r "${builtins.toString cfg.remotes}"; then
+            flatpak remote-delete --user $r
+          fi
+        done
+
         for i in ${builtins.toString cfg.remotes}; do
           flatpak remote-add --user --if-not-exists $i
         done
