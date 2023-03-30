@@ -72,7 +72,6 @@ in
             flatpak uninstall --user --noninteractive $r
           fi
         done
-
         flatpak uninstall --user --unused --noninteractive
         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         for i in ${builtins.toString cfg.packages}; do
