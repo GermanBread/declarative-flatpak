@@ -1,6 +1,4 @@
-{ pkgs, ... }: {
-  services.getty.autologinUser = "root";
-
+{ config, pkgs, flatpak, ... }: {
   systemd.services.NetworkManager-wait-online.enable = false;
 
   services.flatpak = {
@@ -13,6 +11,11 @@
     cores = 8;
     memorySize = 8096 * 2;
     diskSize = 10 * 1024;
+  };
+
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = false;
   };
 
   services.flatpak.enable = true;
@@ -29,10 +32,10 @@
   };
 
   environment.loginShellInit = ''
-    trap 'poweroff' EXIT
+    trap 'sudo poweroff' EXIT
   '';
 
-  users.users."root".shell = pkgs.zsh;
+  networking.networkmanager.enable = true;
 
   programs.zsh = {
     enable = true;
@@ -44,7 +47,29 @@
     };
   };
 
-  networking.networkmanager.enable = true;
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  
+  users.users."user" = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    initialPassword = "password";
+    shell = pkgs.zsh;
+  };
+  services.getty.autologinUser = "user";
+  home-manager.users."user" = {
+    imports = [
+      flatpak.homeManagerModules.default
+    ];
+
+    services.flatpak.packages = [
+      "de.shorsh.discord-screenaudio"
+    ];
+
+    home.file.".zshrc".text = "";
+
+    home.stateVersion = "22.11";
+  };
 
   system.stateVersion = "22.05";
 }
