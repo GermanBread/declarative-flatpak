@@ -79,6 +79,12 @@ in
       };
     };
 
+    home.activation = {
+      start-service = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD systemctl --user start manage-user-flatpaks.service
+      '';
+    }
+
     xdg.enable = true;
   };
 }
