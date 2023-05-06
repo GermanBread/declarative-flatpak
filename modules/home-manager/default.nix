@@ -81,9 +81,11 @@ in
 
     home.activation = {
       start-service = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD systemctl --user start manage-user-flatpaks.service
+        export PATH=${lib.makeBinPath (with pkgs; [ systemd ])}:$PATH
+
+        $DRY_RUN_CMD systemctl --user start manage-user-flatpaks.service || true
       '';
-    }
+    };
 
     xdg.enable = true;
   };
