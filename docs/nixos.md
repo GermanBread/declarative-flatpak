@@ -1,0 +1,23 @@
+```nix
+{
+  inputs = {
+    # ...
+    flatpaks.url = "github:GermanBread/declarative-flatpak/stable";
+    # ...
+  };
+
+  outputs = { ..., flatpaks, ... }: {
+    nixosConfigurations.<host> = nixpkgs.lib.nixosSystem {
+      # ...
+      modules = [
+        # ...
+        flatpaks.nixosModules.default
+        # ...
+        ./configuration.nix
+        # ...
+      ];
+      # ...
+    };
+  };
+}
+```

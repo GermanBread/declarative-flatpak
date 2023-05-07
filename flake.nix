@@ -58,11 +58,11 @@
     };
   }) // {
     nixosModules = rec {
-      declarative-flatpak = import ./modules/nixos;
+      declarative-flatpak = import ./src/modules/nixos.nix;
       default = declarative-flatpak;
     };
     homeManagerModules = rec {
-      declarative-flatpak = import ./modules/home-manager;
+      declarative-flatpak = import ./src/modules/home-manager.nix;
       default = declarative-flatpak;
     };
   };

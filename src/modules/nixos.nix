@@ -1,36 +1,11 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
   cfg = config.services.flatpak;
 in
 
 {
-  options.services.flatpak = {
-    packages = mkOption {
-      type = types.listOf types.str;
-      default = [];
-      example = [ "org.kde.index" "org.kde.kdenlive" ];
-      description = ''
-        Which packages to install.
-      '';
-    };
-    preInitCommand = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      description = ''
-        Which command(s) to run before installation.
-      '';
-    };
-    postInitCommand = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      description = ''
-        Which command(s) to run after installation.
-      '';
-    };
-  };
+  options.services.flatpak = import ../options.nix { mkOption = lib.mkOption; types = lib.types; };
 
   config = {
     systemd.services."manage-system-flatpaks" = {
