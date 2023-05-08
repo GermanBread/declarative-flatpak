@@ -5,7 +5,7 @@ let
 in
 
 {
-  options.services.flatpak = import ../options.nix { mkOption = lib.mkOption; types = lib.types; };
+  options.services.flatpak = import ../options.nix { inherit lib; };
 
   config = {
     systemd.services."manage-system-flatpaks" = {
@@ -16,37 +16,10 @@ in
       wantedBy = [
         "multi-user.target"
       ];
-      path = with pkgs; [
-        inetutils
-        flatpak
-      ];
-      script = ''
-        echo -n "Waiting for net."
-        until ping -c1 github.com; do sleep 1; done
-        echo "Ok."
-        
-        set -eu
-
-        elem() {
-          for i in $2; do
-            [ $i = $1 ] && return 0
-          done
-          return 1
-        }
-
-        ${if cfg.preInitCommand != null then cfg.preInitCommand else "true"}
-        flatpak list --app --columns=app --system | while read r; do
-          if ! elem $r "${builtins.toString cfg.packages}"; then
-            flatpak uninstall --system --noninteractive $r
-          fi
-        done
-        flatpak uninstall --system --unused --noninteractive
-        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-        for i in ${builtins.toString cfg.packages}; do
-          flatpak install --system --noninteractive --or-update $i
-        done
-        ${if cfg.postInitCommand != null then cfg.postInitCommand else "true"}
-      '';
+      script = "${import ../script.nix {
+        inherit config lib pkgs;
+        extra-flatpak-flags = [ "--system" ];
+      }}";
     };
 
     assertions = [

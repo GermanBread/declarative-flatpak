@@ -14,42 +14,49 @@
     devShells.default = pkgs.mkShell {
       buildInputs = with pkgs; [
         nixos-shell
+        gawk
         jq
       ];
       shellHook = ''
+        timeout() {
+          seq 1 5 | while read r; do
+            echo x
+            sleep 1
+          done | awk '
+          NR < 5 {
+            printf "\r(press CTRL-C to cancel) Starting vm in %d\033[0K", 6 - NR
+          }
+          NR > 4 {
+            printf "\rStarting vm in %d\033[0K", 6 - NR
+          }
+          END {
+            printf "\rStarting vm\033[0K\n"
+          }
+          '
+        }
+        
         run-vm() {
-          pushd test
-          nix flake update --inputs-from ../
+          pushd test &>/dev/null
+          nix flake update --inputs-from ../ 2>&1 | awk '
+          {
+            printf "\rUpdating flake"
+          }
+          END {
+            printf "\rDone\033[0K\n"
+          }
+          '
           nixos-shell --flake .#
-          popd
+          popd &>/dev/null
         }
         
         test-vm() {
           run-vm
-          
-          countdown=4
-          echo -n '(press CTRL-C to cancel) Restarting vm in 5'
-          while [ $countdown -gt 0 ]; do
-            sleep 1
-            echo -n ...$countdown
-            countdown=$(($countdown - 1))
-          done
-          sleep 1
-          echo ...0
+          timeout
           test-vm
         }
 
         init-hook() {
-          countdown=4
-          echo -n '(press CTRL-C to cancel) Starting vm in 5'
-          while [ $countdown -gt 0 ]; do
-            sleep 1
-            echo -n ...$countdown
-            countdown=$(($countdown - 1))
-          done
-          sleep 1
-          echo ...0
-          
+          timeout
           test-vm
         }
 

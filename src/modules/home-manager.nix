@@ -1,11 +1,7 @@
 { config, lib, pkgs, ... }:
 
-let
-  script = (import ../hm-script.nix { inherit config pkgs lib; }).script;
-in
-
 {
-  options.services.flatpak = import ../options.nix { mkOption = lib.mkOption; types = lib.types; };
+  options.services.flatpak = import ../options.nix { inherit lib; };
 
   config = {
     systemd.user.services."manage-user-flatpaks" = {
@@ -20,7 +16,10 @@ in
         ];
       };
       Service = {
-        ExecStart = "${script}";
+        ExecStart = "${import ../script.nix {
+          inherit config lib pkgs;
+          extra-flatpak-flags = [ "--user" ];
+        }}";
       };
     };
 

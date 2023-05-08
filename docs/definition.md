@@ -1,34 +1,43 @@
 # services.flatpak.**packages**
-## default
+## Default
+```nix
+null
 ```
-[]
+## Example
+```nix
+[ "flathub:org.kde.index" "flathub-beta:org.kde.kdenlive" ]
 ```
-## example
-```
-[ "org.kde.index" "org.kde.kdenlive" ]
-```
-## description
-```
-Which packages to install. Package names vary from distro to distro.
-```
+## Description
+Which packages to install.
+
+Use this format: `<remote name>:<flatpak ref>`
+
+If left at the default value, nothing will be done.
+
 # services.flatpak.**preInitCommand**
-## description
-```
-Which command to run before installtion.
-```
-## WARNING
-### Multiline strings have to be escaped properly, like so:
-```
-foo && \
-  bar
-```
+## Description
+Which commands to run before installation.
+
+If left at the default value, nothing will be done.
+
 # services.flatpak.**postInitCommand**
+Which commands to run after installation.
+
+If left at the default value, nothing will be done.
+
+# services.flatpak.**remotes**
+## Default
+```nix
+null
 ```
-Which command to run after installation.
+## Example
+```nix
+{
+  "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
+  "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
+};
 ```
-## WARNING:
-### Multiline strings have to be escaped properly, like so:
-```
-foo && \
-  bar
-```
+## Description
+Declare flatpak remotes.
+
+If left at the default value, nothing will be done.

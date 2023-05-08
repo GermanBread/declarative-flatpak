@@ -3,8 +3,13 @@
 
   services.flatpak = {
     packages = [
-      "org.mozilla.firefox"
+      "flathub-beta:org.mozilla.firefox//stable"
+      "org.kde.index"
     ];
+    remotes = {
+      "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
+      "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
+    };
   };
 
   virtualisation = {
@@ -62,9 +67,17 @@
       flatpak.homeManagerModules.default
     ];
 
-    services.flatpak.packages = [
-      "de.shorsh.discord-screenaudio"
-    ];
+    services.flatpak = {
+      packages = [
+        "flathub:de.shorsh.discord-screenaudio"
+        "flathub-beta:org.chromium.Chromium//beta"
+        "flathub:com.usebottles.bottles"
+      ];
+      remotes = {
+        "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
+        "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
+      };
+    };
 
     home.file.".zshrc".text = "";
 
