@@ -35,7 +35,7 @@ null
 {
   "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
   "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
-};
+}
 ```
 ## Description
 Declare flatpak remotes.
