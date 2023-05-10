@@ -13,13 +13,27 @@ pkgs.writeShellScript "setup-flatpaks" ''
     printf "Waiting for net (%d tries)\n", (NR)
   }
   END {
-    printf "OK\n"
+    printf "Network connected.\n"
   }
   '
 
   set -eu
 
   ${cfg.preInitCommand}
+
+  if [ $(flatpak remotes ${builtins.toString extra-flatpak-flags} | tr -d '\n' | wc -l ) -eq 0 ]; then
+    ${if cfg.remotes != null && builtins.length (builtins.attrValues cfg.remotes) > 0 then ''
+    echo "No remotes have been found. Adding them now."
+
+    ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
+    echo "Adding remote ${name} with URL ${value}"
+    flatpak remote-add --if-not-exists ${builtins.toString extra-flatpak-flags} ${name} ${value}
+    '') cfg.remotes))}
+    '' else ''
+    echo "No remotes installed nor declared in config. No idea what to do."
+    exit 1
+    ''}
+  fi
 
   ${if cfg.packages != null then ''
   _default_remote=$(flatpak remotes ${builtins.toString extra-flatpak-flags} --columns=name | head -n1)
