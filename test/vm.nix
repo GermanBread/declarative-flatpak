@@ -4,7 +4,8 @@
   services.flatpak = {
     packages = [
       "flathub-beta:org.mozilla.firefox//stable"
-      "org.kde.index"
+      "flathub:org.kde.index//stable"
+      "flathub:org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
@@ -69,9 +70,9 @@
 
     services.flatpak = {
       packages = [
-        "flathub:de.shorsh.discord-screenaudio"
+        "flathub:de.shorsh.discord-screenaudio//stable"
         "flathub-beta:org.chromium.Chromium//beta"
-        "flathub:com.usebottles.bottles"
+        "flathub:com.usebottles.bottles//stable"
       ];
       remotes = {
         "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";

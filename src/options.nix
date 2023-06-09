@@ -2,11 +2,13 @@
 
 with lib;
 
-{
+let
+  custom-types = (import ./lib/types.nix { inherit lib; }).types;
+in {
   packages = mkOption {
-    type = types.nullOr (types.listOf types.str);
+    type = types.nullOr (types.listOf custom-types.fpkg);
     default = null;
-    example = [ "org.kde.index" "flathub-beta:org.kde.kdenlive" ];
+    example = [ "flathub:org.kde.index//stable" "flathub-beta:org.kde.kdenlive//stable" ];
     description = ''
       Which packages to install.
 
@@ -35,7 +37,7 @@ with lib;
     '';
   };
   remotes = mkOption {
-    type = types.nullOr types.anything;
+    type = types.nullOr custom-types.fremote;
     default = null;
     example = ''
       services.flatpak.remotes = {

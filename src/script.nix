@@ -36,29 +36,46 @@ pkgs.writeShellScript "setup-flatpaks" ''
   fi
 
   ${if cfg.packages != null then ''
-  _default_remote=$(flatpak remotes ${builtins.toString extra-flatpak-flags} --columns=name | head -n1)
-  flatpak list --app --columns=ref,origin ${builtins.toString extra-flatpak-flags} | while read r; do
+  _affected_pkgs=$(flatpak list --columns=ref,origin ${builtins.toString extra-flatpak-flags} | while read r; do
     _unfiltered_id=$(awk '{print$1}' <<< $r)
     _remote=$(awk '{print$2}' <<< $r)
-    [ -z $_remote ] && _remote=$_default_remote
     _id=$(flatpak remote-info ${builtins.toString extra-flatpak-flags} $_remote $_unfiltered_id -r)
 
     case $_remote:$_id in
     ${builtins.toString (builtins.map (pkg: let
       split = builtins.split ":" pkg;
-      unfiltered-id = if (builtins.length split) > 1 then builtins.elemAt split 2 else builtins.head split;
-      remote = if (builtins.length split) > 1 then builtins.elemAt split 0 else "$_default_remote";
+      unfiltered-id = builtins.elemAt split 2;
+      remote = builtins.elemAt split 0;
     in ''
       ${remote}:$(flatpak remote-info ${builtins.toString extra-flatpak-flags} ${remote} ${unfiltered-id} -r))
-        echo "NOT removing $_remote:$_id"
+        echo "${remote} $(flatpak remote-info ${builtins.toString extra-flatpak-flags} ${remote} ${unfiltered-id} -r)"
       ;;
     '') cfg.packages)}
       *)
-        echo "Removing $_remote:$_id"
-        flatpak uninstall ${builtins.toString extra-flatpak-flags} --noninteractive $_id
+        true
       ;;
     esac
-  done
+  done)
+  echo $_affected_pkgs
+
+  while read remote ref; do
+    case $remote:$ref in
+    ${builtins.toString (builtins.map (pkg: let
+      split = builtins.split ":" pkg;
+      unfiltered-id = builtins.elemAt split 2;
+      remote = builtins.elemAt split 0;
+    in ''
+      ${remote}:$(flatpak remote-info ${builtins.toString extra-flatpak-flags} ${remote} ${unfiltered-id} -r))
+        true
+      ;;
+    '') cfg.packages)}
+      *)
+        echo "Removing $remote:$ref"
+        flatpak uninstall ${builtins.toString extra-flatpak-flags} --noninteractive $ref
+      ;;
+    esac
+  done <<<$_affected_pkgs
+
   flatpak uninstall ${builtins.toString extra-flatpak-flags} --unused --noninteractive
   '' else "true"}
   
@@ -74,11 +91,9 @@ pkgs.writeShellScript "setup-flatpaks" ''
   '' else "true"}
 
   ${if cfg.packages != null then ''
-  _default_remote=$(flatpak remotes ${builtins.toString extra-flatpak-flags} --columns=name | head -n1)
   for i in ${builtins.toString cfg.packages}; do
     _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | tr -d ':')
     _id=$(echo $i | grep -Eo '[a-zA-Z0-9._/-]+$')
-    [ -z $_remote ] && _remote=$_default_remote
 
     echo "Installing/Updating $_id from $_remote"
     flatpak install ${builtins.toString extra-flatpak-flags} --noninteractive --or-update $_remote $_id
