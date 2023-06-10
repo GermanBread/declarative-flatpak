@@ -30,63 +30,50 @@ pkgs.writeShellScript "setup-flatpaks" ''
     flatpak remote-add --if-not-exists ${builtins.toString extra-flatpak-flags} ${name} ${value}
     '') cfg.remotes))}
     '' else ''
-    echo "No remotes installed nor declared in config. No idea what to do."
-    exit 1
+    echo "No remotes installed nor declared in config. Refusing to do anything."
+    exit 0
     ''}
   fi
 
   ${if cfg.packages != null then ''
-  _affected_pkgs=$(flatpak list --columns=ref,origin ${builtins.toString extra-flatpak-flags} | while read r; do
-    _unfiltered_id=$(awk '{print$1}' <<< $r)
-    _remote=$(awk '{print$2}' <<< $r)
-    _id=$(flatpak remote-info ${builtins.toString extra-flatpak-flags} $_remote $_unfiltered_id -r)
+  flatpak ${builtins.toString extra-flatpak-flags} list --app --columns=ref,origin | while read preref remote; do
+    ref=$(flatpak ${builtins.toString extra-flatpak-flags} remote-info $remote $preref -r)
 
-    case $_remote:$_id in
-    ${builtins.toString (builtins.map (pkg: let
-      split = builtins.split ":" pkg;
-      unfiltered-id = builtins.elemAt split 2;
-      remote = builtins.elemAt split 0;
-    in ''
-      ${remote}:$(flatpak remote-info ${builtins.toString extra-flatpak-flags} ${remote} ${unfiltered-id} -r))
-        echo "${remote} $(flatpak remote-info ${builtins.toString extra-flatpak-flags} ${remote} ${unfiltered-id} -r)"
-      ;;
-    '') cfg.packages)}
-      *)
-        true
-      ;;
-    esac
-  done)
-  echo $_affected_pkgs
-
-  while read remote ref; do
     case $remote:$ref in
     ${builtins.toString (builtins.map (pkg: let
       split = builtins.split ":" pkg;
-      unfiltered-id = builtins.elemAt split 2;
+      ref = builtins.elemAt split 2;
       remote = builtins.elemAt split 0;
     in ''
-      ${remote}:$(flatpak remote-info ${builtins.toString extra-flatpak-flags} ${remote} ${unfiltered-id} -r))
+      ${remote}:$(flatpak ${builtins.toString extra-flatpak-flags} remote-info ${remote} ${ref} -r))
         true
       ;;
     '') cfg.packages)}
       *)
         echo "Removing $remote:$ref"
-        flatpak uninstall ${builtins.toString extra-flatpak-flags} --noninteractive $ref
+        flatpak ${builtins.toString extra-flatpak-flags} uninstall --noninteractive $ref
       ;;
     esac
-  done <<<$_affected_pkgs
+  done
 
-  flatpak uninstall ${builtins.toString extra-flatpak-flags} --unused --noninteractive
+  # Now take care of runtimes
+  flatpak ${builtins.toString extra-flatpak-flags} pin | while read ref; do
+    echo "[WORKAROUND] Removing runtime $ref"
+    flatpak ${builtins.toString extra-flatpak-flags} uninstall --noninteractive $ref || true
+    flatpak ${builtins.toString extra-flatpak-flags} pin --remove $ref || true
+  done
+
+  flatpak ${builtins.toString extra-flatpak-flags} uninstall --unused --noninteractive
   '' else "true"}
   
   ${if cfg.remotes != null then ''
-  flatpak remotes ${builtins.toString extra-flatpak-flags} --columns=name | while read r; do
+  flatpak ${builtins.toString extra-flatpak-flags} remotes --columns=name | while read r; do
     echo "Forcefully removing remote $r"
-    flatpak remote-delete ${builtins.toString extra-flatpak-flags} --force $r
+    flatpak ${builtins.toString extra-flatpak-flags} remote-delete --force $r
   done
   ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
   echo "Adding remote ${name} with URL ${value}"
-  flatpak remote-add ${builtins.toString extra-flatpak-flags} ${name} ${value}
+  flatpak ${builtins.toString extra-flatpak-flags} remote-add ${name} ${value}
   '') cfg.remotes))}
   '' else "true"}
 
@@ -96,7 +83,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
     _id=$(echo $i | grep -Eo '[a-zA-Z0-9._/-]+$')
 
     echo "Installing/Updating $_id from $_remote"
-    flatpak install ${builtins.toString extra-flatpak-flags} --noninteractive --or-update $_remote $_id
+    flatpak ${builtins.toString extra-flatpak-flags} install --noninteractive --or-update $_remote $_id
   done
   '' else "true"}
   

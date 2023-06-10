@@ -4,7 +4,7 @@ with lib;
 
 let
   regex = {
-    fpkg = "^[a-z-]+:[a-zA-Z0-9._-]+\/[0-9x_-]*?\/[a-zA-Z0-9.-]+$";
+    fpkg = "^[a-z-]+:[a-zA-Z0-9._-]+\/[0-9x_a-zA-Z-]*?\/[a-zA-Z0-9.-]+$";
     fremote = "^[A-Za-z0-9-]+$";
   };
 in {
@@ -14,8 +14,7 @@ in {
       description = "flathub pkg";
       check = x: if builtins.match regex.fpkg x != null then true else throw ''
         Hi there. Your package "${x}" needs to follow the new naming scheme:
-        remote-name:package-name/arch/branch-name
-        (arch can be omitted, but the slash still needs to be there)
+        remote-name:type/package-name/arch/branch-name
       '';
     };
     fremote = mkOptionType {
