@@ -58,7 +58,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   # Now take care of runtimes
   flatpak ${builtins.toString extra-flatpak-flags} pin | while read ref; do
-    echo "[WORKAROUND] Removing runtime $ref"
+    echo "[WORKAROUND] Removing pinned runtime $ref"
     flatpak ${builtins.toString extra-flatpak-flags} uninstall --noninteractive $ref || true
     flatpak ${builtins.toString extra-flatpak-flags} pin --remove $ref || true
   done

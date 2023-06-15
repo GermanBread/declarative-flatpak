@@ -10,7 +10,10 @@ null
 ## Description
 Which packages to install.
 
-Use this format: `<remote name>:<flatpak ref>`
+Use this format: `<remote name>:<flatpak ref>/<arch>/<branch>`
+
+`<arch>` may be omitted, but the slash needs to be kept.
+`<remote name>` is subject to the same remote naming constraints.
 
 If left at the default value, nothing will be done.
 
@@ -39,5 +42,7 @@ null
 ```
 ## Description
 Declare flatpak remotes.
+
+May only contain uppercase and lowercase ASCII characters and hyphens.
 
 If left at the default value, nothing will be done.
