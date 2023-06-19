@@ -13,7 +13,7 @@ Which packages to install.
 Use this format: `<remote name>:<flatpak ref>/<arch>/<branch>`
 
 `<arch>` may be omitted, but the slash needs to be kept.
-`<remote name>` is subject to the same remote naming constraints.
+`<remote name>` is subject to the remote naming constraints.
 
 If left at the default value, nothing will be done.
 
