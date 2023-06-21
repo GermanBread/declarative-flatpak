@@ -5,7 +5,7 @@ null
 ```
 ## Example
 ```nix
-[ "flathub:org.kde.index" "flathub-beta:org.kde.kdenlive" ]
+[ "flathub:org.kde.index//stable" "flathub-beta:org.kde.kdenlive/x86_64/stable" ]
 ```
 ## Description
 Which packages to install.

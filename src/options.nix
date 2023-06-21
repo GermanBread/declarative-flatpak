@@ -63,7 +63,7 @@ in {
   #         ];
   #       };
   #       "com.usebottles.bottles" = {
-  #         filesystem  = [
+  #         filesystem = [
   #           "/var/lib/flatpak"
   #           "!home"
   #         ];
@@ -81,7 +81,7 @@ in {
   #     Paths prefixed with '!' will deny read permissions for that path.
   #     Paths are escaped.
 
-  #     (home-manager only) If the value of a key is null, the host's override will be used.
+  #     (home-manager only) If the value of a key is set to "use-system", the system's override will be used.
 
   #     This module removes all other overrides not declared explicitly.
   #     If left at the default (null), nothing will be done.
