@@ -18,7 +18,7 @@ in
       ];
       script = "${import ../script.nix {
         inherit config lib pkgs;
-        extra-flatpak-flags = [ "--system" ];
+        is-system-install = true;
       }}";
     };
 

@@ -18,7 +18,7 @@
       Service = {
         ExecStart = "${import ../script.nix {
           inherit config lib pkgs;
-          extra-flatpak-flags = [ "--user" ];
+          is-system-install = false;
         }}";
       };
     };

@@ -3,8 +3,8 @@
 
   services.flatpak = {
     packages = [
-      "flathub-beta:org.mozilla.firefox//stable"
-      "flathub:org.kde.index//stable"
+      # "flathub-beta:org.mozilla.firefox//stable"
+      # "flathub:org.kde.index//stable"
       "flathub:org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
     ];
     remotes = {
@@ -41,6 +41,10 @@
     trap 'sudo poweroff' EXIT
   '';
 
+  environment.systemPackages = with pkgs; [
+    tmux
+  ];
+
   networking.networkmanager.enable = true;
 
   programs.zsh = {
@@ -71,8 +75,8 @@
     services.flatpak = {
       packages = [
         "flathub:de.shorsh.discord-screenaudio//stable"
-        "flathub-beta:org.chromium.Chromium//beta"
-        "flathub:com.usebottles.bottles//stable"
+        # "flathub-beta:org.chromium.Chromium//beta"
+        # "flathub:com.usebottles.bottles//stable"
       ];
       remotes = {
         "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
