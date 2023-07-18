@@ -19,6 +19,19 @@ pkgs.writeShellScript "setup-flatpaks" ''
   }
   '
 
+  add_remotes() {
+    ${if cfg.remotes != null then ''
+    flatpak ${builtins.toString fargs} remotes --columns=name | while read r; do
+      echo "Forcefully removing remote $r"
+      flatpak ${builtins.toString fargs} remote-delete --force $r
+    done
+    ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
+    echo "Adding remote ${name} with URL ${value}"
+    flatpak ${builtins.toString fargs} remote-add ${name} ${value}
+    '') cfg.remotes))}
+    '' else "true"}
+  }
+
   set -eu
 
   ${if is-system-install then ''
@@ -47,68 +60,92 @@ pkgs.writeShellScript "setup-flatpaks" ''
     ''}
   fi
 
-  ${if cfg.packages != null then ''
-  flatpak ${builtins.toString fargs} list --app --columns=ref,origin | while read preref remote; do
-    ref=$(flatpak ${builtins.toString fargs} remote-info $remote $preref -r)
-
-    case $remote:$ref in
-    ${builtins.toString (builtins.map (pkg: let
-      split = builtins.split ":" pkg;
-      ref = builtins.elemAt split 2;
-      remote = builtins.elemAt split 0;
-    in ''
-      ${remote}:$(flatpak ${builtins.toString fargs} remote-info ${remote} ${ref} -r))
-        true
-      ;;
-    '') cfg.packages)}
-      *)
-        echo "Removing $remote:$ref"
-        flatpak ${builtins.toString fargs} uninstall --noninteractive $ref
-      ;;
-    esac
-  done
-
-  # Now take care of runtimes
-  flatpak ${builtins.toString fargs} pin | while read ref; do
-    echo "[WORKAROUND] Removing pinned runtime $ref"
-    flatpak ${builtins.toString fargs} uninstall --noninteractive $ref || true
-    flatpak ${builtins.toString fargs} pin --remove $ref || true
-  done
-
-  flatpak ${builtins.toString fargs} uninstall --unused --noninteractive
-  '' else "true"}
-  
-  ${if cfg.remotes != null then ''
-  flatpak ${builtins.toString fargs} remotes --columns=name | while read r; do
-    echo "Forcefully removing remote $r"
-    flatpak ${builtins.toString fargs} remote-delete --force $r
-  done
-  ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
-  echo "Adding remote ${name} with URL ${value}"
-  flatpak ${builtins.toString fargs} remote-add ${name} ${value}
-  '') cfg.remotes))}
-  '' else "true"}
+  add_remotes
 
   ${if cfg.packages != null then ''
   for i in ${builtins.toString cfg.packages}; do
     _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | tr -d ':')
     _id=$(echo $i | grep -Eo '[a-zA-Z0-9._/-]+$')
 
-    echo "Installing/Updating $_id from $_remote"
-    flatpak ${builtins.toString fargs} install --noninteractive --or-update $_remote $_id
+    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
   '' else "true"}
   
   ${cfg.postInitCommand}
 
-  echo "Applying changes"
-  ${if is-system-install then ''
-  rsync -a --delete $TMPDIR/ /var/lib/flatpak/
-  chmod 755 /var/lib/flatpak/
-  '' else ''
-  rsync -a --delete $TMPDIR/ ${config.xdg.dataHome}/flatpak/
-  chmod 755 ${config.xdg.dataHome}/flatpak/
-  ''}
+  echo "Applying changes - configuring remotes"
+  unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+  add_remotes
+  export FLATPAK_USER_DIR=$TMPDIR
+  export FLATPAK_SYSTEM_DIR=$TMPDIR
+
+  # Unpin everything
+  unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+  flatpak ${builtins.toString fargs} pin | while read r; do
+    flatpak ${builtins.toString fargs} pin --remove $r
+  done
+  export FLATPAK_USER_DIR=$TMPDIR
+  export FLATPAK_SYSTEM_DIR=$TMPDIR
+
+  # Remove refs
+  echo "Applying changes - uninstalling refs"
+  unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+  flatpak ${builtins.toString fargs} list --app --columns=ref | while read r; do
+    export FLATPAK_USER_DIR=$TMPDIR
+    export FLATPAK_SYSTEM_DIR=$TMPDIR
+
+    unset _pass
+    export _pass=false
+    flatpak ${builtins.toString fargs} list --app --columns=ref | while read f; do
+      [ $r = $f ] && export _pass=true || true
+    done
+    
+    unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+    
+    $_pass || flatpak ${builtins.toString fargs} uninstall -y --noninteractive app/$r || true
+  done
+  
+  unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+  flatpak ${builtins.toString fargs} list --runtime --columns=ref | while read r; do
+    export FLATPAK_USER_DIR=$TMPDIR
+    export FLATPAK_SYSTEM_DIR=$TMPDIR
+
+    unset _pass
+    export _pass=false
+    flatpak ${builtins.toString fargs} list --runtime --columns=ref | while read f; do
+      [ $r = $f ] && export _pass=true || true
+    done
+    
+    unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+    
+    $_pass || flatpak ${builtins.toString fargs} uninstall -y --noninteractive runtime/$r || true
+  done
+
+  flatpak uninstall --unused -y --noninteractive
+
+  # Install refs
+  echo "Applying changes - installing refs"
+  export FLATPAK_USER_DIR=$TMPDIR
+  export FLATPAK_SYSTEM_DIR=$TMPDIR
+  flatpak ${builtins.toString fargs} list --runtime --columns=origin,ref | while read o r; do
+    unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+
+    flatpak ${builtins.toString fargs} install -y --noninteractive --no-deps --no-related --no-auto-pin $o runtime/$r
+
+    export FLATPAK_USER_DIR=$TMPDIR
+    export FLATPAK_SYSTEM_DIR=$TMPDIR
+  done
+
+  export FLATPAK_USER_DIR=$TMPDIR
+  export FLATPAK_SYSTEM_DIR=$TMPDIR
+  flatpak ${builtins.toString fargs} list --app --columns=origin,ref | while read o r; do
+    unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+
+    flatpak ${builtins.toString fargs} install -y --noninteractive --no-deps --no-related --no-auto-pin $o app/$r
+
+    export FLATPAK_USER_DIR=$TMPDIR
+    export FLATPAK_SYSTEM_DIR=$TMPDIR
+  done
 
   rm -rf $TMPDIR || true
 ''

@@ -3,9 +3,10 @@
 
   services.flatpak = {
     packages = [
-      # "flathub-beta:org.mozilla.firefox//stable"
+      "flathub-beta:org.mozilla.firefox//stable"
       # "flathub:org.kde.index//stable"
-      "flathub:org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
+      # "flathub:org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
+      "flathub:org.freedesktop.Platform.VulkanLayer.vkBasalt//21.08"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
