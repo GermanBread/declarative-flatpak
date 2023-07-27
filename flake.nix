@@ -12,46 +12,46 @@
     };
   in {
     devShells.default = let 
-    script = pkgs.writeShellScriptBin "test-vm" ''
-      timeout() {
-        seq 1 5 | while read r; do
-          echo x
-          sleep 1
-        done | awk '
-        NR < 5 {
-          printf "\r(press CTRL-C to cancel) Starting vm in %d\033[0K", 6 - NR
+      script = pkgs.writeShellScriptBin "test-vm" ''
+        timeout() {
+          seq 1 5 | while read r; do
+            echo x
+            sleep 1
+          done | awk '
+          NR < 5 {
+            printf "\r(press CTRL-C to cancel) Starting vm in %d\033[0K", 6 - NR
+          }
+          NR > 4 {
+            printf "\rStarting vm in %d\033[0K", 6 - NR
+          }
+          END {
+            printf "\rStarting vm\033[0K\n"
+          }
+          '
         }
-        NR > 4 {
-          printf "\rStarting vm in %d\033[0K", 6 - NR
+        
+        run-vm() {
+          pushd test &>/dev/null
+          nix flake update -v --inputs-from ../ 2>&1 | awk '
+          {
+            printf "\rUpdating flake"
+          }
+          END {
+            printf "\rDone\033[0K\n"
+          }
+          '
+          nixos-shell --flake .#
+          popd &>/dev/null
         }
-        END {
-          printf "\rStarting vm\033[0K\n"
+        
+        test-vm() {
+          run-vm
+          timeout
+          test-vm
         }
-        '
-      }
-      
-      run-vm() {
-        pushd test &>/dev/null
-        nix flake update -v --inputs-from ../ 2>&1 | awk '
-        {
-          printf "\rUpdating flake"
-        }
-        END {
-          printf "\rDone\033[0K\n"
-        }
-        '
-        nixos-shell --flake .#
-        popd &>/dev/null
-      }
-      
-      test-vm() {
-        run-vm
-        timeout
-        test-vm
-      }
 
-      test-vm
-    '';
+        test-vm
+      '';
     in pkgs.mkShell {
       packages = with pkgs; [
         nixos-shell
