@@ -14,9 +14,9 @@ in {
       description = "flathub pkg";
       check = x: if builtins.match "^${regex.fpkg}$" x != null then true else throw ''
         Hi there. Your package "${x}" needs to follow the new naming scheme:
-          remote-name:type/package-name/arch/branch-name
+          remote-name:package-name/arch/branch-name
         or
-          remote-name:type/package-name//branch-name
+          remote-name:package-name//branch-name
       '';
     };
     fremote = mkOptionType {
