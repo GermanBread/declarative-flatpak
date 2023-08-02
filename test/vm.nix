@@ -20,6 +20,28 @@
     diskSize = 10 * 1024;
   };
 
+  # Dev env stuff
+  environment.loginShellInit = ''
+    trap 'sudo poweroff' EXIT
+  '';
+  #virtualisation.sharedDirectories = {
+  #  "source" = {
+  #    target = "/src";
+  #    source = "/tmp/flatpak-module-dev";
+  #  };
+  #};
+  #systemd.paths."hot-reload" = {
+  #  pathConfig = {
+  #    "PathModified" = "/src";
+  #    "Unit" = [ "hot-restart.service" ];
+  #  };
+  #};
+  #systemd.services."hot-restart" = {
+  #  script = ''
+  #    systemctl poweroff
+  #  '';
+  #};
+
   security.sudo = {
     enable = true;
     wheelNeedsPassword = false;
@@ -37,10 +59,6 @@
     mountHome = false;
     mountNixProfile = false;
   };
-
-  environment.loginShellInit = ''
-    trap 'sudo poweroff' EXIT
-  '';
 
   environment.systemPackages = with pkgs; [
     tmux

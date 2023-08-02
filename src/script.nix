@@ -8,7 +8,7 @@ let
 in
 
 pkgs.writeShellScript "setup-flatpaks" ''
-  export PATH=${lib.makeBinPath (with pkgs; [ coreutils inetutils gnugrep flatpak gawk rsync ])}:$PATH
+  export PATH=${lib.makeBinPath (with pkgs; [ coreutils inetutils gnugrep flatpak gawk rsync ostree ])}:$PATH
   
   until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
   {
@@ -19,15 +19,19 @@ pkgs.writeShellScript "setup-flatpaks" ''
   }
   '
 
-  add_remotes() {
+  nuke_remotes() {
     ${if cfg.remotes != null then ''
     flatpak ${builtins.toString fargs} remotes --columns=name | while read r; do
       echo "Forcefully removing remote $r"
       flatpak ${builtins.toString fargs} remote-delete --force $r
     done
+    '' else "true"}
+  }
+  add_remotes() {
+    ${if cfg.remotes != null then ''
     ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
     echo "Adding remote ${name} with URL ${value}"
-    flatpak ${builtins.toString fargs} remote-add ${name} ${value}
+    flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
     '') cfg.remotes))}
     '' else "true"}
   }
@@ -49,11 +53,6 @@ pkgs.writeShellScript "setup-flatpaks" ''
   if [ $(flatpak remotes ${builtins.toString fargs} | tr -d '\n' | wc -l ) -eq 0 ]; then
     ${if cfg.remotes != null && builtins.length (builtins.attrValues cfg.remotes) > 0 then ''
     echo "No remotes have been found. Adding them now."
-
-    ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
-    echo "Adding remote ${name} with URL ${value}"
-    flatpak remote-add --if-not-exists ${builtins.toString fargs} ${name} ${value}
-    '') cfg.remotes))}
     '' else ''
     echo "No remotes installed nor declared in config. Refusing to do anything."
     exit 0
@@ -104,7 +103,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
     
     $_pass || flatpak ${builtins.toString fargs} uninstall -y --noninteractive app/$r || true
   done
-  
+
   unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
   flatpak ${builtins.toString fargs} list --runtime --columns=ref | while read r; do
     export FLATPAK_USER_DIR=$TMPDIR
@@ -123,6 +122,9 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   flatpak uninstall --unused -y --noninteractive
 
+  nuke_remotes
+  add_remotes
+
   # Install refs
   echo "Applying changes - installing refs"
   export FLATPAK_USER_DIR=$TMPDIR
@@ -130,7 +132,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
   flatpak ${builtins.toString fargs} list --runtime --columns=origin,ref | while read o r; do
     unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
 
-    flatpak ${builtins.toString fargs} install -y --noninteractive --no-deps --no-related --no-auto-pin $o runtime/$r
+    flatpak ${builtins.toString fargs} install -y --noninteractive --no-deps --no-related --no-pull --no-auto-pin $o runtime/$r
 
     export FLATPAK_USER_DIR=$TMPDIR
     export FLATPAK_SYSTEM_DIR=$TMPDIR
@@ -141,7 +143,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
   flatpak ${builtins.toString fargs} list --app --columns=origin,ref | while read o r; do
     unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
 
-    flatpak ${builtins.toString fargs} install -y --noninteractive --no-deps --no-related --no-auto-pin $o app/$r
+    flatpak ${builtins.toString fargs} install -y --noninteractive --no-deps --no-related --no-pull --no-auto-pin $o app/$r
 
     export FLATPAK_USER_DIR=$TMPDIR
     export FLATPAK_SYSTEM_DIR=$TMPDIR
