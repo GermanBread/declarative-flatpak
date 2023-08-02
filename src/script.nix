@@ -62,8 +62,8 @@ pkgs.writeShellScript "setup-flatpaks" ''
   add_remotes
 
   ${if cfg.packages != null then ''
-  for i in ${builtins.toString cfg.packages}; do
-    _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | tr -d ':')
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ".+\.flatpak(ref)?$" x == null) cfg.packages)}; do
+    _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | head -c-1)
     _id=$(echo $i | grep -Eo '[a-zA-Z0-9._/-]+$')
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
@@ -148,6 +148,22 @@ pkgs.writeShellScript "setup-flatpaks" ''
     export FLATPAK_USER_DIR=$TMPDIR
     export FLATPAK_SYSTEM_DIR=$TMPDIR
   done
+
+  echo "Installing out-of-tree refs"
+  unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+  ${if cfg.packages != null then ''
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpak$" x != null) cfg.packages)}; do
+    _id=$(echo $i | grep -Eo ':.+\.flatpak$' | tail -c+2)
+
+    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_id
+  done
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpakref$" x != null) cfg.packages)}; do
+    _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | head -c-1)
+    _id=$(echo $i | grep -Eo ':.+\.flatpakref$' | tail -c+2)
+
+    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
+  done
+  '' else "true"}
 
   rm -rf $TMPDIR || true
 ''

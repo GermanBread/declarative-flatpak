@@ -3,10 +3,12 @@
 
   services.flatpak = {
     packages = [
-      "flathub-beta:org.mozilla.firefox//stable"
-      # "flathub:org.kde.index//stable"
-      # "flathub:org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
-      "flathub:org.freedesktop.Platform.VulkanLayer.vkBasalt//21.08"
+      # "flathub-beta:app/org.mozilla.firefox//stable"
+      # "flathub:app/org.kde.index//stable"
+      # "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
+      # "flathub:runtime/org.freedesktop.Platform.VulkanLayer.vkBasalt//21.08"
+      "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
+      ":${./xwaylandvideobridge.flatpak}"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
@@ -93,9 +95,9 @@
 
     services.flatpak = {
       packages = [
-        "flathub:de.shorsh.discord-screenaudio//stable"
-        # "flathub-beta:org.chromium.Chromium//beta"
-        # "flathub:com.usebottles.bottles//stable"
+        "flathub:app/de.shorsh.discord-screenaudio//stable"
+        # "flathub-beta:app/org.chromium.Chromium//beta"
+        # "flathub:app/com.usebottles.bottles//stable"
       ];
       remotes = {
         "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
