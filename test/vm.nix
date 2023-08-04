@@ -3,16 +3,21 @@
 
   services.flatpak = {
     packages = [
-      # "flathub-beta:app/org.mozilla.firefox//stable"
-      # "flathub:app/org.kde.index//stable"
-      # "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
-      # "flathub:runtime/org.freedesktop.Platform.VulkanLayer.vkBasalt//21.08"
+      "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08"
+      "flathub:runtime/org.freedesktop.Platform.VulkanLayer.vkBasalt//21.08"
+      "flathub:app/org.kde.index//stable"
+      
+      "flathub-beta:app/org.mozilla.firefox//stable"
+      
+      "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
+
       "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
       ":${./xwaylandvideobridge.flatpak}"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
       "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
+      "launcher-moe" = "https://gol.launcher.moe/gol.launcher.moe.flatpakrepo";
     };
   };
 

@@ -8,7 +8,7 @@ null
 [ "flathub:app/org.kde.index//stable" "flathub-beta:app/org.kde.kdenlive/x86_64/stable" ]
 
 # out-of-tree flatpaks can be installed like this (note: they can't be a URL because flatpak doesn't like that)
-[ ":./foobar.flatpak" "flathub:/root/testflatpak.flatpakref" ]
+[ ":${./foobar.flatpak}" "flathub:/root/testflatpak.flatpakref" ]
 ```
 ## Description
 Which packages to install.

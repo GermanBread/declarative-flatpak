@@ -66,6 +66,7 @@
         
         echo -e "\033[31mRun test-vm to test your code\033[0m"
       '';
+      NIX_PATH="nixpkgs=${nixpkgs}";
     };
   }) // {
     nixosModules = rec {
