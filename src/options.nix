@@ -6,7 +6,7 @@ let
   custom-types = (import ./lib/types.nix { inherit lib; }).types;
 in {
   packages = mkOption {
-    type = types.nullOr (types.listOf custom-types.fpkg);
+    type = types.listOf custom-types.fpkg;
     default = null;
     example = [ "flathub:org.kde.index//stable" "flathub-beta:org.kde.kdenlive//stable" ];
     description = ''
@@ -14,8 +14,6 @@ in {
 
       As soon as you use more than one remote, you should start prefixing them to avoid conflicts.
       The package must be prefixed with the remote's name and a colon.
-
-      If left at the default value, nothing will be done.
     '';
   };
   preInitCommand = mkOption {
@@ -37,8 +35,8 @@ in {
     '';
   };
   remotes = mkOption {
-    type = types.nullOr custom-types.fremote;
-    default = null;
+    type = custom-types.fremote;
+    default = {};
     example = ''
       services.flatpak.remotes = {
         "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
@@ -47,13 +45,11 @@ in {
     '';
     description = ''
       Declare flatpak remotes.
-      
-      If left at the default value, nothing will be done.
     '';
   };
   # overrides = mkOption {
-  #   type = types.nullOr types.anything;
-  #   default = null;
+  #   type = types.anything;
+  #   default = {};
   #   example = ''
   #     services.flatpak.overrides = {
   #       global = { # global is a reserved name

@@ -1,7 +1,7 @@
 # services.flatpak.**packages**
 ## Default
 ```nix
-null
+[]
 ```
 ## Example
 ```nix
@@ -19,8 +19,6 @@ Use this format: `<remote name>:<type>/<flatpak ref>/<arch>/<branch>`
 `<arch>` may be omitted, but the slash needs to be kept.
 `<remote name>` is subject to the remote naming constraints.
 
-If left at the default value, nothing will be done.
-
 # services.flatpak.**preInitCommand**
 ## Description
 Which commands to run before installation.
@@ -35,7 +33,7 @@ If left at the default value, nothing will be done.
 # services.flatpak.**remotes**
 ## Default
 ```nix
-null
+{}
 ```
 ## Example
 ```nix
@@ -49,4 +47,8 @@ Declare flatpak remotes.
 
 May only contain uppercase and lowercase ASCII characters and hyphens.
 
-If left at the default value, nothing will be done.
+# Note on overrides:
+
+If you want to apply overrides, do so by running commands via postInitCommand
+
+Eventually I will figure out a way to do overrides declaratively, but this will do

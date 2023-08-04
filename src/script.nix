@@ -20,12 +20,10 @@ pkgs.writeShellScript "setup-flatpaks" ''
   '
 
   add_remotes() {
-    ${if cfg.remotes != null then ''
     ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
     echo "Adding remote ${name} with URL ${value}"
     flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
     '') cfg.remotes))}
-    '' else "true"}
   }
 
   set -eu
@@ -42,18 +40,13 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   ${cfg.preInitCommand}
 
-  if [ $(flatpak remotes ${builtins.toString fargs} | tr -d '\n' | wc -l ) -eq 0 ]; then
-    ${if cfg.remotes != null && builtins.length (builtins.attrValues cfg.remotes) > 0 then ''
-    echo "No remotes have been found. Adding them now."
-    '' else ''
-    echo "No remotes installed nor declared in config. Refusing to do anything."
-    exit 0
-    ''}
-  fi
+  ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
+  echo "No remotes declared in config. Refusing to do anything."
+  exit 0
+  '' else ""}
 
   add_remotes
 
-  ${if cfg.packages != null then ''
   for i in ${builtins.toString (builtins.filter (x: builtins.match ".+\.flatpak(ref)?$" x == null) cfg.packages)}; do
     _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | head -c-2)
     _id=$(echo $i | grep -Eo '[a-zA-Z0-9._/-]+$')
@@ -73,7 +66,6 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
-  '' else "true"}
 
   ${if is-system-install then ''
   [ -d /var/lib/flatpak ] && mv /var/lib/flatpak $(mktemp -d .flatpak-old.XXXXXX)
