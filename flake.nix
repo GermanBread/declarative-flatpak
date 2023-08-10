@@ -53,6 +53,7 @@
         test-vm
       '';
     in pkgs.mkShell {
+      NIX_PATH="nixpkgs=${nixpkgs}";
       packages = with pkgs; [
         nixos-shell
         ncurses
