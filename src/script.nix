@@ -48,31 +48,45 @@ pkgs.writeShellScript "setup-flatpaks" ''
   add_remotes
 
   for i in ${builtins.toString (builtins.filter (x: builtins.match ".+\.flatpak(ref)?$" x == null) cfg.packages)}; do
-    _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | head -c-2)
-    _id=$(echo $i | grep -Eo '[a-zA-Z0-9._/-]+$')
+    _remote=$(grep -Eo '^[a-zA-Z-]+:' <<< $i | head -c-2)
+    _id=$(grep -Eo '[a-zA-Z0-9._/-]+$' <<< $i)
+    _rev=$(grep -Eo '\/[a-z0-9]$' <<< $_id)
+
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
 
   echo "Installing out-of-tree refs"
   for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpak$" x != null) cfg.packages)}; do
-    _id=$(echo $i | grep -Eo ':.+\.flatpak$' | tail -c+2)
+    _id=$(grep -Eo ':.+\.flatpak$' <<< $i | tail -c+2)
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_id
   done
   for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpakref$" x != null) cfg.packages)}; do
-    _remote=$(echo $i | grep -Eo '^[a-zA-Z-]+:' | head -c-2)
-    _id=$(echo $i | grep -Eo ':.+\.flatpakref$' | tail -c+2)
+    _remote=$(grep -Eo '^[a-zA-Z-]+:' <<< $i | head -c-2)
+    _id=$(grep -Eo ':.+\.flatpakref$' <<< $i | tail -c+2)
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
 
   ${if is-system-install then ''
-  [ -d /var/lib/flatpak ] && mv /var/lib/flatpak $(mktemp -d .flatpak-old.XXXXXX)
+  if [ -d /var/lib/flatpak ]; then
+    for i in overrides db; do
+      rm -rf $TMPDIR/$i
+      [ -d /var/lib/flatpak/$i ] && cp -a /var/lib/flatpak/$i $TMPDIR/$i
+    done
+    mv /var/lib/flatpak $(mktemp -d .flatpak-old.XXXXXX -p /tmp)
+  fi
   chmod 755 $TMPDIR
   mv $TMPDIR /var/lib/flatpak
   '' else ''
-  [ -d ${config.xdg.dataHome}/flatpak ] && mv ${config.xdg.dataHome}/flatpak $(mktemp -d .flatpak-old-$USER.XXXXXX)
+  if [ -d ${config.xdg.dataHome}/flatpak ]; then
+    for i in overrides db; do
+      rm -rf $TMPDIR/$i
+      [ -d ${config.xdg.dataHome}/flatpak/$i ] && cp -a ${config.xdg.dataHome}/flatpak/$i $TMPDIR/$i
+    done
+    mv ${config.xdg.dataHome}/flatpak $(mktemp -d .flatpak-old-$USER.XXXXXX -p /tmp)
+  fi
   mv $TMPDIR ${config.xdg.dataHome}/flatpak
   ''}
   

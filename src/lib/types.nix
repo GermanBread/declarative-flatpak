@@ -5,7 +5,7 @@ with lib;
 let
   regex = rec {
     fremote = "[A-Za-z0-9-]+";
-    fpkg = "${fremote}:(runtime|app)\/[a-zA-Z0-9._-]+\/[0-9x_a-zA-Z-]*?\/[a-zA-Z0-9.-]+|(${fremote})?:.+\.flatpak(ref)?";
+    fpkg = "${fremote}:(runtime|app)\/[a-zA-Z0-9._-]+\/[0-9x_a-zA-Z-]*?\/[a-zA-Z0-9.-]+(\/[a-z0-9]+)?|(${fremote})?:.+\.flatpak(ref)?";
   };
 in {
   types = {
@@ -14,12 +14,13 @@ in {
       description = "flathub pkg";
       check = x: if builtins.match "^${regex.fpkg}$" x != null then true else throw ''
         Hi there. Your package "${x}" needs to follow the naming scheme:
-          remote-name:type/package-name/arch/branch-name
+          remote-name:type/package-name/arch/branch-name/commit
         
         Replace "remote-name" with the remote name you want to install from.
         Replace "type" with either "runtime" or "app".
         Replace "arch" with the CPU architecture, may be omitted (but the slash needs to be kept)
         Replace "branch-name" with the name of the application branch.
+        Replace "commit" with a given commit, or leave it out entirely
       '';
     };
     fremote = mkOptionType {
