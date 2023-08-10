@@ -1,8 +1,25 @@
-[ ] installing a specified commit
-[ ] Figuring out smarter diffing...
+>>- CONSIDERING, BUT NOT PLANNED -<<
+
+[ ] use a fetcher, allowing us to move the flatpak itself into the store
+
+[ ] opt-in telemetry for "stable" branch
+[ ] opt-out telemetry for "dev" branch
+--> requires branch detection code
+
+==> PLANNED <==
+
+[ ] install commit for ref
+
+<-> WORKING ON IT <->
+
+[ ] support for installing a specific commit of a ref
+
+<|| DONE ||>
 
 [X] out-of-tree flatpaks
 [X] consider the remote when diffing the installed packages
 --> fix bug with diffing when different branches are used
 [X] use Nix more
 [X] update docs with new definitions
+
+<-< DROPPED >->
