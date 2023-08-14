@@ -10,8 +10,6 @@
 
 <-> WORKING ON IT <->
 
-[ ] support for installing a specific commit of a ref
-
 <|| DONE ||>
 
 [X] out-of-tree flatpaks
@@ -20,5 +18,6 @@
 [X] use Nix more
 [X] update docs with new definitions
 [X] overrides
+[X] support for installing a specific commit of a ref
 
 <-< DROPPED >->
