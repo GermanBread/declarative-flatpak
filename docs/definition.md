@@ -13,11 +13,13 @@
 ## Description
 Which packages to install.
 
-Use this format: `<remote name>:<type>/<flatpak ref>/<arch>/<branch>`
+Use this format: `<remote name>:<type>/<flatpak ref>/<arch>/<branch>:<commit>`
 
-`<type>` needs to be one of "app" or "runtime"
-`<arch>` may be omitted, but the slash needs to be kept.
-`<remote name>` is subject to the remote naming constraints.
+Replace `<remote-name>` with the remote name you want to install from.
+Replace `<type>` with either "runtime" or "app".
+Replace `<arch>` with the CPU architecture, may be omitted (but the slash needs to be kept)
+Replace `<branch-name`> with the name of the application branch.
+Replace `<commit>` with a given commit, or leave it out entirely
 
 # services.flatpak.**preInitCommand**
 ## Description
@@ -47,8 +49,38 @@ Declare flatpak remotes.
 
 May only contain uppercase and lowercase ASCII characters and hyphens.
 
-# Note on overrides:
+# services.flatpak.**overrides**
 
-If you want to apply overrides, do so by running commands via postInitCommand
+## Default
+```nix
+{}
+```
 
-Eventually I will figure out a way to do overrides declaratively, but this will do
+## Example
+```nix
+services.flatpak.overrides = {
+  "global" = {
+    filesystems = [
+      "home"
+      "!~/Games/Heroic"
+    ];
+    environment = {
+      "MOZ_ENABLE_WAYLAND" = 1;
+    };
+    sockets = [
+      "!x11"
+      "fallback-x11"
+    ];
+  };
+}
+```
+
+## Description
+Overrides to apply.
+
+Paths prefixed with '!' will deny read permissions for that path, also applies to sockets.
+Paths may not be escaped.
+
+## Note on overrides:
+
+If you want to apply specialised overrides, do so by running commands via postInitCommand

@@ -3,28 +3,43 @@
 
   services.flatpak = {
     packages = [
-      "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08/9ee91f5c7944"
-      #"flathub:runtime/org.freedesktop.Platform.VulkanLayer.vkBasalt//21.08"
-      #"flathub:app/org.kde.index//stable"
+      "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08:9ee91f5c7944"
+      # "flathub-beta:runtime/com.valvesoftware.Steam.Utility.vkBasalt//beta" # this runtime is cursed for some reason
+      # "flathub:app/org.kde.index//stable"
       
-      #"flathub-beta:app/org.mozilla.firefox//stable"
+      # "flathub-beta:app/org.mozilla.firefox//stable"
       
-      #"launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
+      # "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
 
-      #"flathub:${./io.gitlab.daikhan.stable.flatpakref}"
-      #":${./xwaylandvideobridge.flatpak}"
+      # "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
+      # ":${./xwaylandvideobridge.flatpak}"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
       "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
       "launcher-moe" = "https://gol.launcher.moe/gol.launcher.moe.flatpakrepo";
     };
+    overrides = {
+      "org.mozilla.firefox" = {
+        filesystems = [
+          "xdg-home/foobar"
+          "!host"
+        ];
+        environment = {
+          "MOZ_ENABLE_WAYLAND" = 1;
+        };
+        sockets = [
+          "!x11"
+          "fallback-x11"
+        ];
+      };
+    };
   };
 
   virtualisation = {
     cores = 8;
     memorySize = 8096 * 2;
-    diskSize = 10 * 1024;
+    diskSize = 16 * 1024;
   };
 
   # Dev env stuff
@@ -68,7 +83,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    tmux
+    tmux ncdu
   ];
 
   networking.networkmanager.enable = true;
@@ -114,6 +129,8 @@
 
     home.stateVersion = "22.11";
   };
+
+  boot.tmpOnTmpfs = true;
 
   system.stateVersion = "22.05";
 }

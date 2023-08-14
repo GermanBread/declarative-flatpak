@@ -47,40 +47,46 @@ in {
       Declare flatpak remotes.
     '';
   };
-  # overrides = mkOption {
-  #   type = types.anything;
-  #   default = {};
-  #   example = ''
-  #     services.flatpak.overrides = {
-  #       global = { # global is a reserved name
-  #         filesystems = [
-  #           "home"
-  #           "!~/Games/Heroic"
-  #         ];
-  #       };
-  #       "com.usebottles.bottles" = {
-  #         filesystem = [
-  #           "/var/lib/flatpak"
-  #           "!home"
-  #         ];
-  #         environment = {
-  #           "GTK_USE_PORTAL" = 1;
-  #         }
-  #       }
-  #     }
-  #   '';
-  #   description = ''
-  #     Overrides to apply.
+  overrides = mkOption {
+    type = types.attrsOf (types.submodule {
+      options = {
+        filesystems = mkOption {
+          type = types.nullOr (types.listOf types.string);
+          default = null;
+        };
+        sockets = mkOption {
+          type = types.nullOr (types.listOf types.string);
+          default = null;
+        };
+        environment = mkOption {
+          type = types.nullOr (types.attrsOf types.anything);
+          default = null;
+        };
+      };
+    });
+    default = {};
+    example = ''
+      services.flatpak.overrides = {
+        "global" = {
+          filesystems = [
+            "home"
+            "!~/Games/Heroic"
+          ];
+          environment = {
+            "MOZ_ENABLE_WAYLAND" = 1;
+          };
+          sockets = [
+            "!x11"
+            "fallback-x11"
+          ];
+        };
+      }
+    '';
+    description = ''
+      Overrides to apply.
 
-  #     Only filesystem overrides supported right now.
-
-  #     Paths prefixed with '!' will deny read permissions for that path.
-  #     Paths are escaped.
-
-  #     (home-manager only) If the value of a key is set to "use-system", the system's override will be used.
-
-  #     This module removes all other overrides not declared explicitly.
-  #     If left at the default (null), nothing will be done.
-  #   '';
-  # };
+      Paths prefixed with '!' will deny read permissions for that path, also applies to sockets.
+      Paths may not be escaped.
+    '';
+  };
 }

@@ -33,5 +33,9 @@
     };
 
     xdg.enable = true;
+    
+    warnings = [
+      "The flatpak module just recieved a big update! What this means for you:\n- Please take some time and read the documentation at https://github.com/GermanBread/declarative-flatpak\n- Remove commands from postInitCommands which might conflict with the new override option"
+    ];
   };
 }
