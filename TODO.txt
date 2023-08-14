@@ -8,8 +8,6 @@
 
 ==> PLANNED <==
 
-[ ] install commit for ref
-
 <-> WORKING ON IT <->
 
 [ ] support for installing a specific commit of a ref
@@ -21,5 +19,6 @@
 --> fix bug with diffing when different branches are used
 [X] use Nix more
 [X] update docs with new definitions
+[X] overrides
 
 <-< DROPPED >->

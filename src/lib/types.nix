@@ -8,7 +8,7 @@ let
     fref = "[a-zA-Z0-9._-]+";
     farch = "[0-9x_a-zA-Z-]*";
     fbranch = "[a-zA-Z0-9.-]+";
-    fcommit = "[a-z0-9]+";
+    fcommit = "[a-z0-9]{64}";
     ffile = "\.flatpak(ref)?";
 
     fpkgnet = "${fremote}:${ftype}\/${fref}\/${farch}\/${fbranch}(:${fcommit})?";
@@ -31,7 +31,7 @@ in {
         Replace "type" with either "runtime" or "app".
         Replace "arch" with the CPU architecture, may be omitted (but the slash needs to be kept)
         Replace "branch-name" with the name of the application branch.
-        Replace "commit" with a given commit, or leave it out entirely
+        Replace "commit" with a given commit, or leave it out entirely, needs to be exactly 64 characters long
       '';
     };
     fremote = mkOptionType {

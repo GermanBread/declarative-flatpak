@@ -59,7 +59,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
 
     if [ -n "$_commit" ]; then
-      flatpak update --commit="$_commit" $_id || echo "failed to update to commit \"$_commit\""
+      flatpak update --commit="$_commit" $_id || echo "failed to update to commit \"$_commit\". Check if the commit is long enough"
     fi
   done
 
