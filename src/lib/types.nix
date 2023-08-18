@@ -31,7 +31,7 @@ in {
         Replace "type" with either "runtime" or "app".
         Replace "arch" with the CPU architecture, may be omitted (but the slash needs to be kept)
         Replace "branch-name" with the name of the application branch.
-        Replace "commit" with a given commit, or leave it out entirely, needs to be exactly 64 characters long
+        Replace "commit" with a given commit, or leave it out entirely, must be exactly 64 characters long
       '';
     };
     fremote = mkOptionType {
