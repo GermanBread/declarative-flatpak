@@ -7,7 +7,7 @@
       # "flathub-beta:runtime/com.valvesoftware.Steam.Utility.vkBasalt//beta" # this runtime is cursed for some reason
       # "flathub:app/org.kde.index//stable"
       
-      "flathub-beta:app/org.mozilla.firefox//stable"
+      # "flathub-beta:app/org.mozilla.firefox//stable"
       
       # "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
 
@@ -83,7 +83,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    tmux ncdu
+    tmux ncdu exa
   ];
 
   networking.networkmanager.enable = true;

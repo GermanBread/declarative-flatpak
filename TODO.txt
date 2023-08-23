@@ -10,9 +10,8 @@
 
 <-> WORKING ON IT <->
 
-[X] Separate by boot
-[ ] Keep the flatpak install from previous boot, but clean old ones
 [ ] Add a safety precaution in case the bootid changes, but the module didn't complete the update (and then GCs the only valid installation)
+[ ] Deduplicate files
 
 <|| DONE ||>
 
@@ -23,5 +22,7 @@
 [X] update docs with new definitions
 [X] overrides
 [X] support for installing a specific commit of a ref
+[X] Separate by boot
+[X] Keep the flatpak install from previous boot, but clean old ones
 
 <-< DROPPED >->

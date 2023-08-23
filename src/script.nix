@@ -32,18 +32,23 @@ pkgs.writeShellScript "setup-flatpaks" ''
   export FLATPAK_DIR=${config.xdg.dataHome}/flatpak
   ''}
 
-  CUR_BOOTID=$(journalctl --list-boots --no-pager | grep -E '^ +0' | awk '{print$2}')
-  PREV_BOOTID=$(journalctl --list-boots --no-pager | grep -E '^ +-1' | awk '{print$2}') || PREV_BOOTID=1
+  CURR_BOOTID=$(journalctl --list-boots --no-pager | grep -E '^ +0' | awk '{print$2}') || \
+    PREV_BOOTID=1
+  PREV_BOOTID=$(journalctl --list-boots --no-pager | grep -E '^ +-1' | awk '{print$2}') || \
+    PREV_BOOTID=2
+  LAST_SUCCESSFUL_BOOTID=$(cat $MODULE_DATA_ROOT/last-successful 2>/dev/null) || \
+    LAST_SUCCESSFUL_BOOTID=3
 
-  export INSTALL_TRASH_DIR=$MODULE_DATA_ROOT/0/$(uuidgen)
-  export TARGET_DIR=$MODULE_DATA_ROOT/$CUR_BOOTID/$(uuidgen)
+  export TARGET_DIR=$MODULE_DATA_ROOT/boot/$CURR_BOOTID/$(uuidgen)
+  export INSTALL_TRASH_DIR=$MODULE_DATA_ROOT/boot/0/$(uuidgen)
 
-  echo Booting with $CUR_BOOTID
-
-  # echo Cleaning old directories
-  # find $MODULE_ROOT -maxdepth 1 -mindepth 1
-
+  echo Running with $CURR_BOOTID
   mkdir -pm 755 $TARGET_DIR
+  mkdir -pm 755 $INSTALL_TRASH_DIR
+
+  echo Cleaning old directories
+  find $MODULE_DATA_ROOT/boot -type d -mindepth 1 -maxdepth 1 -not \( -path "$MODULE_DATA_ROOT/boot/$CURR_BOOTID" -o -path "$MODULE_DATA_ROOT/boot/$PREV_BOOTID" -o -path "$MODULE_DATA_ROOT/boot/$LAST_SUCCESSFUL_BOOTID" \) -exec rm -rf {} \;
+
   export FLATPAK_USER_DIR=$TARGET_DIR
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR
 
@@ -92,7 +97,6 @@ pkgs.writeShellScript "setup-flatpaks" ''
   done
 
   # Install files
-  mkdir -pm 755 $INSTALL_TRASH_DIR
   [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR
   rm -rf $FLATPAK_DIR
   mkdir -pm 755 $FLATPAK_DIR/overrides
@@ -102,9 +106,11 @@ pkgs.writeShellScript "setup-flatpaks" ''
   '') (builtins.attrNames cfg.overrides))}
   [ -d $TARGET_DIR/exports ] && rsync -aL $TARGET_DIR/exports/ $FLATPAK_DIR/exports
   find $FLATPAK_DIR/exports/bin \
-    -type f -exec sed -i 's,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm' '{}' \;
+    -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm" '{}' \;
   find $FLATPAK_DIR/exports/share/applications \
-    -type f -exec sed -i 's,Exec=flatpak run,Exec=FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm' '{}' \;
+    -type f -exec sed -i "s,Exec=flatpak run,Exec=FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
 
   ${cfg.postInitCommand}
+
+  echo $CURR_BOOTID >$MODULE_DATA_ROOT/last-successful
 ''
