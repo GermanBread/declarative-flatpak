@@ -10,6 +10,10 @@
 
 <-> WORKING ON IT <->
 
+[X] Separate by boot
+[ ] Keep the flatpak install from previous boot, but clean old ones
+[ ] Add a safety precaution in case the bootid changes, but the module didn't complete the update (and then GCs the only valid installation)
+
 <|| DONE ||>
 
 [X] out-of-tree flatpaks

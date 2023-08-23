@@ -9,7 +9,7 @@ let
 in
 
 pkgs.writeShellScript "setup-flatpaks" ''
-  export PATH=${lib.makeBinPath (with pkgs; [ coreutils inetutils gnugrep flatpak gawk rsync ostree mktemp ])}:$PATH
+  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused ])}
   
   until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
   {
@@ -22,15 +22,30 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   set -eu
 
+  export LANG=C
+
   ${if is-system-install then ''
-  export TMPDIR=/var/cache/flatpak-module
+  export MODULE_DATA_ROOT=/var/lib/flatpak-module
+  export FLATPAK_DIR=/var/lib/flatpak
   '' else ''
-  export TMPDIR=${config.xdg.cacheHome}/flatpak-module
+  export MODULE_DATA_ROOT=${config.xdg.stateHome}/flatpak-module
+  export FLATPAK_DIR=${config.xdg.dataHome}/flatpak
   ''}
-  rm -rf $TMPDIR
-  mkdir -pm 700 $TMPDIR
-  export FLATPAK_USER_DIR=$TMPDIR
-  export FLATPAK_SYSTEM_DIR=$TMPDIR
+
+  CUR_BOOTID=$(journalctl --list-boots --no-pager | grep -E '^ +0' | awk '{print$2}')
+  PREV_BOOTID=$(journalctl --list-boots --no-pager | grep -E '^ +-1' | awk '{print$2}') || PREV_BOOTID=1
+
+  export INSTALL_TRASH_DIR=$MODULE_DATA_ROOT/0/$(uuidgen)
+  export TARGET_DIR=$MODULE_DATA_ROOT/$CUR_BOOTID/$(uuidgen)
+
+  echo Booting with $CUR_BOOTID
+
+  # echo Cleaning old directories
+  # find $MODULE_ROOT -maxdepth 1 -mindepth 1
+
+  mkdir -pm 755 $TARGET_DIR
+  export FLATPAK_USER_DIR=$TARGET_DIR
+  export FLATPAK_SYSTEM_DIR=$TARGET_DIR
 
   ${cfg.preInitCommand}
 
@@ -76,54 +91,20 @@ pkgs.writeShellScript "setup-flatpaks" ''
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
 
-  # install overrides
-  mkdir -p $TMPDIR/overrides
-  ${builtins.concatStringsSep "\n" (builtins.map (overridename: let
-    overridevalue = cfg.overrides.${overridename};
-  in ''
-  echo "Installing override for ${overridename}"
-  cat << EOF >$TMPDIR/overrides/${overridename}
-  
-  [Context]
-  ${if overridevalue.filesystems != null then ''
-  filesystems=${builtins.concatStringsSep ";" overridevalue.filesystems}
-  '' else ""}
-  ${if overridevalue.sockets != null then ''
-  sockets=${builtins.concatStringsSep ";" overridevalue.sockets}
-  '' else ""}
-
-  [Environment]
-  ${if overridevalue.environment != null then ''
-  ${builtins.concatStringsSep ";" (builtins.map (envname: let
-    envvalue = overridevalue.environment.${envname};
-  in ''
-  ${envname}=${builtins.toString envvalue}
-  '') (builtins.attrNames (overridevalue.environment or [])))}
-  '' else ""}
-
-  EOF
+  # Install files
+  mkdir -pm 755 $INSTALL_TRASH_DIR
+  [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR
+  rm -rf $FLATPAK_DIR
+  mkdir -pm 755 $FLATPAK_DIR/overrides
+  [ -d $INSTALL_TRASH_DIR/db ] && mv $INSTALL_TRASH_DIR/db $FLATPAK_DIR/db
+  ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
+  ln -s ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} $FLATPAK_DIR/overrides/${ref}
   '') (builtins.attrNames cfg.overrides))}
+  [ -d $TARGET_DIR/exports ] && rsync -aL $TARGET_DIR/exports/ $FLATPAK_DIR/exports
+  find $FLATPAK_DIR/exports/bin \
+    -type f -exec sed -i 's,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm' '{}' \;
+  find $FLATPAK_DIR/exports/share/applications \
+    -type f -exec sed -i 's,Exec=flatpak run,Exec=FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm' '{}' \;
 
-  ${if is-system-install then ''
-  if [ -d /var/lib/flatpak ]; then
-    for i in db; do
-      rm -rf $TMPDIR/$i
-      [ -d /var/lib/flatpak/$i ] && cp -a /var/lib/flatpak/$i $TMPDIR/$i
-    done
-    mv /var/lib/flatpak $(mktemp -d flatpak-module-system-old.XXXXXX -p /tmp)
-  fi
-  chmod 755 $TMPDIR
-  mv $TMPDIR /var/lib/flatpak
-  '' else ''
-  if [ -d ${config.xdg.dataHome}/flatpak ]; then
-    for i in db; do
-      rm -rf $TMPDIR/$i
-      [ -d ${config.xdg.dataHome}/flatpak/$i ] && cp -a ${config.xdg.dataHome}/flatpak/$i $TMPDIR/$i
-    done
-    mv ${config.xdg.dataHome}/flatpak $(mktemp -d flatpak-module-user-old-$USER.XXXXXX -p /tmp)
-  fi
-  mv $TMPDIR ${config.xdg.dataHome}/flatpak
-  ''}
-  
   ${cfg.postInitCommand}
 ''
