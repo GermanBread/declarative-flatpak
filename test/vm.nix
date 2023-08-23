@@ -7,7 +7,7 @@
       # "flathub-beta:runtime/com.valvesoftware.Steam.Utility.vkBasalt//beta" # this runtime is cursed for some reason
       # "flathub:app/org.kde.index//stable"
       
-      # "flathub-beta:app/org.mozilla.firefox//stable"
+      "flathub-beta:app/org.mozilla.firefox//stable"
       
       # "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
 
@@ -101,13 +101,13 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   
+  services.getty.autologinUser = "user";
   users.users."user" = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     initialPassword = "password";
     shell = pkgs.zsh;
   };
-  services.getty.autologinUser = "user";
   home-manager.users."user" = {
     imports = [
       flatpak.homeManagerModules.default
