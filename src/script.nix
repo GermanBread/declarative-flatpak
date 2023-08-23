@@ -40,8 +40,10 @@ pkgs.writeShellScript "setup-flatpaks" ''
   TARGET_DIR=$MODULE_DATA_ROOT/boot/$CURR_BOOTID/$(uuidgen)
   INSTALL_TRASH_DIR=$MODULE_DATA_ROOT/boot/0/$(uuidgen)
 
-  echo Cleaning old directories
-  find $MODULE_DATA_ROOT/boot -type d -mindepth 2 -maxdepth 2 -not \( -path "$MODULE_DATA_ROOT/boot/$CURR_BOOTID/*" -o -path "$ACTIVE_DIR" \) -exec rm -rf {} \;
+  if [ -d $MODULE_DATA_ROOT/boot ]; then
+    echo Cleaning old directories
+    find $MODULE_DATA_ROOT/boot -type d -mindepth 2 -maxdepth 2 -not \( -path "$MODULE_DATA_ROOT/boot/$CURR_BOOTID/*" -o -path "$ACTIVE_DIR" \) -exec rm -rf {} \;
+  fi
   
   echo Running with boot ID $CURR_BOOTID
   mkdir -pm 755 $TARGET_DIR
