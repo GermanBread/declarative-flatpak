@@ -43,6 +43,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
   if [ -d $MODULE_DATA_ROOT/boot ]; then
     echo Cleaning old directories
     find $MODULE_DATA_ROOT/boot -type d -mindepth 2 -maxdepth 2 -not \( -path "$MODULE_DATA_ROOT/boot/$CURR_BOOTID/*" -o -path "$ACTIVE_DIR" \) -exec rm -rf {} \;
+    sudo rmdir $MODULE_DATA_ROOT/boot/* 2>/dev/null || true
   fi
   
   echo Running with boot ID $CURR_BOOTID
@@ -111,6 +112,10 @@ pkgs.writeShellScript "setup-flatpaks" ''
   [ -d $TARGET_DIR/exports/share/applications ] && \
     find $FLATPAK_DIR/exports/share/applications \
       -type f -exec sed -i "s,Exec=flatpak run,Exec=FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
+    
+  for i in repo runtime app; do
+    [ -e $TARGET_DIR/$i ] && ln -s $TARGET_DIR/$i $FLATPAK_DIR/$i
+  done
 
   ${cfg.postInitCommand}
 
