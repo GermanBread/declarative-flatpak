@@ -12,7 +12,7 @@
       # "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
 
       # "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
-      # ":${./xwaylandvideobridge.flatpak}"
+      ":${./xwaylandvideobridge.flatpak}"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
