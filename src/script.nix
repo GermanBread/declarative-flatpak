@@ -119,7 +119,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
       -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm" '{}' \;
   [ -d $TARGET_DIR/exports/share/applications ] && \
     find $FLATPAK_DIR/exports/share/applications \
-      -type f -exec sed -i "s,Exec=flatpak run,Exec=FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
+      -type f -exec sed -i "s,Exec=flatpak run,env Exec=FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
     
   for i in repo runtime app; do
     [ -e $TARGET_DIR/$i ] && ln -s $TARGET_DIR/$i $FLATPAK_DIR/$i
