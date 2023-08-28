@@ -9,7 +9,7 @@ let
 in
 
 pkgs.writeShellScript "setup-flatpaks" ''
-  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused ])}
+  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ])}
   
   until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
   {
@@ -55,10 +55,14 @@ pkgs.writeShellScript "setup-flatpaks" ''
   mkdir -pm 755 $TARGET_DIR
   mkdir -pm 755 $INSTALL_TRASH_DIR
 
-  export FLATPAK_USER_DIR=$TARGET_DIR
-  export FLATPAK_SYSTEM_DIR=$TARGET_DIR
+  export FLATPAK_USER_DIR=$TARGET_DIR/data
+  export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
 
   ${cfg.preInitCommand}
+
+  # if grep ${builtins.toJSON cfg.packages} $ACTIVE_DIR/pkgs &>/dev/null; then
+  #   cp -a $ACTIVE_DIR/data $TARGET_DIR/data
+  # fi
 
   ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
   echo "No remotes declared in config. Refusing to do anything."
@@ -102,7 +106,18 @@ pkgs.writeShellScript "setup-flatpaks" ''
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
 
+  # deduplicate
+  pushd $ACTIVE_DIR/data &>/dev/null
+  find . -type f | while read r; do
+    if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
+      ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
+      echo "$r deduplicated"
+    fi
+  done
+  popd &>/dev/null
+
   # Install files
+  echo "Installing files"
   [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR
   rm -rf $FLATPAK_DIR
   mkdir -pm 755 $FLATPAK_DIR/overrides
@@ -110,17 +125,19 @@ pkgs.writeShellScript "setup-flatpaks" ''
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
   ln -s ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} $FLATPAK_DIR/overrides/${ref}
   '') (builtins.attrNames cfg.overrides))}
-  [ -d $TARGET_DIR/exports ] && rsync -aL $TARGET_DIR/exports/ $FLATPAK_DIR/exports
-  [ -d $TARGET_DIR/exports/bin ] && \
+  [ -d $TARGET_DIR/data/exports ] && rsync -aL $TARGET_DIR/data/exports/ $FLATPAK_DIR/exports
+  [ -d $TARGET_DIR/data/exports/bin ] && \
     find $FLATPAK_DIR/exports/bin \
-      -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm" '{}' \;
-  [ -d $TARGET_DIR/exports/share/applications ] && \
+      -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR/data FLATPAK_SYSTEM_DIR=$TARGET_DIR/data exec flatpak run,gm" '{}' \;
+  [ -d $TARGET_DIR/data/exports/share/applications ] && \
     find $FLATPAK_DIR/exports/share/applications \
-      -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
+      -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR/data FLATPAK_SYSTEM_DIR=$TARGET_DIR/data flatpak run,gm" '{}' \;
     
   for i in repo runtime app; do
-    [ -e $TARGET_DIR/$i ] && ln -s $TARGET_DIR/$i $FLATPAK_DIR/$i
+    [ -e $TARGET_DIR/data/$i ] && ln -s $TARGET_DIR/data/$i $FLATPAK_DIR/$i
   done
+
+  echo ${builtins.toJSON cfg.packages} >$TARGET_DIR/pkgs
 
   ${cfg.postInitCommand}
 
