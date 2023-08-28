@@ -107,14 +107,17 @@ pkgs.writeShellScript "setup-flatpaks" ''
   done
 
   # deduplicate
-  pushd $ACTIVE_DIR/data &>/dev/null
-  find . -type f | while read r; do
-    if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
-      ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
-      echo "$r deduplicated"
-    fi
-  done
-  popd &>/dev/null
+  if [ -d $ACTIVE_DIR/data ]; then
+    echo "Deduplicating"
+    pushd $ACTIVE_DIR/data &>/dev/null
+    find . -type f | while read r; do
+      if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
+        ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
+        echo "$r deduplicated"
+      fi
+    done
+    popd &>/dev/null
+  fi
 
   # Install files
   echo "Installing files"
