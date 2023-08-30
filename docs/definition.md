@@ -1,3 +1,12 @@
+# services.flatpak.**enableModule**
+## Default
+```nix
+config.services.flatpak.enable
+```
+## Description
+Enable/disable this module.
+If your NixOS config has `services.flatpak.enable` set to `true`, this module will be activated automatically.
+
 # services.flatpak.**packages**
 ## Default
 ```nix

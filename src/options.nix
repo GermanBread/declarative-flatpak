@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, cfg }:
 
 with lib;
 
@@ -9,17 +9,24 @@ in {
     type = types.listOf custom-types.fpkg;
     default = null;
     example = [ "flathub:org.kde.index//stable" "flathub-beta:org.kde.kdenlive//stable" ];
-    description = ''
+    description = mdDoc ''
       Which packages to install.
 
       As soon as you use more than one remote, you should start prefixing them to avoid conflicts.
       The package must be prefixed with the remote's name and a colon.
     '';
   };
+  enableModule = mkOption {
+    type = types.bool;
+    default = cfg.enable;
+    description = mdDoc ''
+      Enable/disable this module.
+    '';
+  };
   preInitCommand = mkOption {
     type = types.nullOr types.str;
     default = "";
-    description = ''
+    description = mdDoc ''
       Which command(s) to run before installation.
 
       If left at the default value, nothing will be done.
@@ -28,7 +35,7 @@ in {
   postInitCommand = mkOption {
     type = types.nullOr types.str;
     default = "";
-    description = ''
+    description = mdDoc ''
       Which command(s) to run after installation.
 
       If left at the default value, nothing will be done.
@@ -43,7 +50,7 @@ in {
         "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
       };
     '';
-    description = ''
+    description = mdDoc ''
       Declare flatpak remotes.
     '';
   };
@@ -82,7 +89,7 @@ in {
         };
       }
     '';
-    description = ''
+    description = mdDoc ''
       Overrides to apply.
 
       Paths prefixed with '!' will deny read permissions for that path, also applies to sockets.

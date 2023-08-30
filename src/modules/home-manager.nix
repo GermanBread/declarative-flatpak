@@ -1,9 +1,13 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, nixosConfig ? null, ... }:
+
+let
+  cfg = if nixosConfig == null then config.services.flatpak else config.services.flatpak // { enable = nixosConfig.services.flatpak.enable; };
+in 
 
 {
-  options.services.flatpak = import ../options.nix { inherit lib; };
+  options.services.flatpak = import ../options.nix { inherit lib cfg; };
 
-  config = {
+  config = lib.mkIf cfg.enableModule {
     systemd.user.services."manage-user-flatpaks" = {
       Unit = {
         After = [
@@ -33,9 +37,5 @@
     };
 
     xdg.enable = true;
-    
-    warnings = [
-      "The flatpak module just recieved a big update! What this means for you:\n- Please take some time and read the documentation at https://github.com/GermanBread/declarative-flatpak\n- Remove commands from postInitCommands which might conflict with the new override option"
-    ];
   };
 }

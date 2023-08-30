@@ -5,9 +5,9 @@ let
 in
 
 {
-  options.services.flatpak = import ../options.nix { inherit lib; };
+  options.services.flatpak = import ../options.nix { inherit lib cfg; };
 
-  config = {
+  config = lib.mkIf cfg.enableModule {
     systemd.services."manage-system-flatpaks" = {
       description = "Manage system-wide flatpaks";
       after = [
@@ -21,16 +21,5 @@ in
         is-system-install = true;
       }}";
     };
-
-    assertions = [
-      {
-        assertion = cfg.enable;
-        message = "This flatpak module is useless if flatpaks are disabled in your config.";
-      }
-    ];
-
-    warnings = [
-      "The flatpak module just recieved a big update! What this means for you:\n- Please take some time and read the documentation at https://github.com/GermanBread/declarative-flatpak\n- Remove commands from postInitCommands which might conflict with the new override option"
-    ];
   };
 }
