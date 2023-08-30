@@ -47,6 +47,10 @@ in {
       Declare flatpak remotes.
     '';
   };
+  showWarnings = mkOption {
+    type = types.bool;
+    default = true;
+  };
   overrides = mkOption {
     type = types.attrsOf (types.submodule {
       options = {
