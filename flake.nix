@@ -1,5 +1,5 @@
 {
-  description = "Global FHS environment for your daily computing needs.";
+  description = "Declarative flatpaks.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
@@ -12,7 +12,7 @@
     };
   in {
     devShells.default = let 
-      script = pkgs.writeShellScriptBin "test-vm" ''
+      script = pkgs.writeShellScriptBin "run-interactive-vm" ''
         timeout() {
           seq 1 5 | while read r; do
             echo x
@@ -30,7 +30,7 @@
           '
         }
         
-        run-vm() {
+        vm() {
           pushd test &>/dev/null
           nix flake update -v --inputs-from ../ 2>&1 | awk '
           {
@@ -44,13 +44,13 @@
           popd &>/dev/null
         }
         
-        test-vm() {
-          run-vm
+        run-interactive-vm() {
+          vm
           timeout
-          test-vm
+          run-interactive-vm
         }
 
-        test-vm
+        run-interactive-vm
       '';
     in pkgs.mkShell {
       packages = with pkgs; [
@@ -64,9 +64,12 @@
       shellHook = ''
         # ln -sfT $(pwd) /tmp/flatpak-module-dev
         
-        echo -e "\033[31mRun test-vm to test your code\033[0m"
+        echo -e "\033[31mRun run-interactive-vm to run your code\033[0m"
       '';
       NIX_PATH="nixpkgs=${nixpkgs}";
+    };
+    checks = {
+      nixos = pkgs.callPackage ./tests/nixos.nix {};
     };
   }) // {
     nixosModules = rec {
