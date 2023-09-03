@@ -68,10 +68,6 @@
       '';
       NIX_PATH="nixpkgs=${nixpkgs}";
     };
-    checks = {
-      nixos = pkgs.callPackage ./tests/nixos.nix { modules = { nixos = self.nixosModules.declarative-flatpak; }; };
-      # home-manager = pkgs.callPackage ./tests/home-manager.nix { modules = { home-manager = self.homeManagerModules.declarative-flatpak; }; };
-    };
   }) // {
     nixosModules = rec {
       declarative-flatpak = import ./src/modules/nixos.nix;

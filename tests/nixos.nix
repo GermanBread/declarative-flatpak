@@ -6,7 +6,7 @@ nixosTest {
   nodes = {
     bare = { config, pkgs, ... }: {
       imports = [
-        modules.nixos
+        modules.flatpak
       ];
 
       services.flatpak.enable = true;
@@ -20,7 +20,7 @@ nixosTest {
     };
     disabled = { config, pkgs, ... }: {
       imports = [
-        modules.nixos
+        modules.flatpak
       ];
 
       services.flatpak = {
@@ -37,7 +37,7 @@ nixosTest {
     };
     pkgs = { config, pkgs, ... }: {
       imports = [
-        modules.nixos
+        modules.flatpak
       ];
 
       services.flatpak = {
