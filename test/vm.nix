@@ -1,9 +1,9 @@
-{ config, pkgs, flatpak, ... }: {
+{ pkgs, flatpak, ... }: {
   systemd.services.NetworkManager-wait-online.enable = false;
 
   services.flatpak = {
     packages = [
-      "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08:9ee91f5c7944516169bb7a327d81ac7b08b149b3cd238b7a11a61bc1abe28ba9"
+      # "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08:9ee91f5c7944516169bb7a327d81ac7b08b149b3cd238b7a11a61bc1abe28ba9"
       # "flathub-beta:runtime/com.valvesoftware.Steam.Utility.vkBasalt//beta" # this runtime is cursed for some reason
       # "flathub:app/org.kde.index//stable"
       
@@ -12,7 +12,7 @@
       # "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
 
       # "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
-      ":${./xwaylandvideobridge.flatpak}"
+      # ":${./xwaylandvideobridge.flatpak}"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";

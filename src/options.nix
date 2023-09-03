@@ -7,7 +7,7 @@ let
 in {
   packages = mkOption {
     type = types.listOf custom-types.fpkg;
-    default = null;
+    default = [];
     example = [ "flathub:org.kde.index//stable" "flathub-beta:org.kde.kdenlive//stable" ];
     description = mdDoc ''
       Which packages to install.
