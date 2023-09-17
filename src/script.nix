@@ -128,13 +128,14 @@ pkgs.writeShellScript "setup-flatpaks" ''
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
   ln -s ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} $FLATPAK_DIR/overrides/${ref}
   '') (builtins.attrNames cfg.overrides))}
-  [ -d $TARGET_DIR/data/exports ] && rsync -aL $TARGET_DIR/data/exports/ $FLATPAK_DIR/exports
   [ -d $TARGET_DIR/data/exports/bin ] && \
-    find $FLATPAK_DIR/exports/bin \
+    find $TARGET_DIR/data/exports/bin \
       -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR/data FLATPAK_SYSTEM_DIR=$TARGET_DIR/data exec flatpak run,gm" '{}' \;
   [ -d $TARGET_DIR/data/exports/share/applications ] && \
-    find $FLATPAK_DIR/exports/share/applications \
+    find $TARGET_DIR/data/exports/share/applications \
       -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR/data FLATPAK_SYSTEM_DIR=$TARGET_DIR/data flatpak run,gm" '{}' \;
+  rm -rf $FLATPAK_DIR/exports
+  [ -d $TARGET_DIR/data/exports ] && rsync -aL $TARGET_DIR/data/exports/ $FLATPAK_DIR/exports
     
   for i in repo runtime app; do
     [ -e $TARGET_DIR/data/$i ] && ln -s $TARGET_DIR/data/$i $FLATPAK_DIR/$i
