@@ -55,10 +55,10 @@ pkgs.writeShellScript "setup-flatpaks" ''
   mkdir -pm 755 $TARGET_DIR
   mkdir -pm 755 $INSTALL_TRASH_DIR
 
+  ${cfg.preInitCommand}
+
   export FLATPAK_USER_DIR=$TARGET_DIR/data
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
-
-  ${cfg.preInitCommand}
 
   # if grep ${builtins.toJSON cfg.packages} $ACTIVE_DIR/pkgs &>/dev/null; then
   #   cp -a $ACTIVE_DIR/data $TARGET_DIR/data
@@ -142,6 +142,8 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   echo ${builtins.toJSON cfg.packages} >$TARGET_DIR/pkgs
 
+  unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
+  
   ${cfg.postInitCommand}
 
   echo $TARGET_DIR  >$MODULE_DATA_ROOT/active
