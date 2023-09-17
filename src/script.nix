@@ -141,10 +141,10 @@ pkgs.writeShellScript "setup-flatpaks" ''
   [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR
   rm -rf $FLATPAK_DIR
   mkdir -pm 755 $FLATPAK_DIR
-  mkdir -p $FLATPAK_DIR/overrides
   [ -d $INSTALL_TRASH_DIR/db ] && mv $INSTALL_TRASH_DIR/db $FLATPAK_DIR/db
+  mkdir -p $TARGET_DIR/data/overrides
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
-  ln -s ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} $FLATPAK_DIR/overrides/${ref}
+  ln -s ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} $TARGET_DIR/data/overrides/${ref}
   '') (builtins.attrNames cfg.overrides))}
   
   # Dereference because exports are symlinks by default
@@ -157,7 +157,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
       -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR/data FLATPAK_SYSTEM_DIR=$TARGET_DIR/data flatpak run,gm" '{}' \;
   [ -d $TARGET_DIR/data/processed-exports ] && rsync -aL $TARGET_DIR/data/processed-exports/ $FLATPAK_DIR/exports
     
-  for i in repo runtime app; do
+  for i in repo runtime app overrides; do
     [ -e $TARGET_DIR/data/$i ] && ln -s $TARGET_DIR/data/$i $FLATPAK_DIR/$i
   done
 
