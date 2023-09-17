@@ -9,7 +9,7 @@ let
 in
 
 pkgs.writeShellScript "setup-flatpaks" ''
-  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils parallel ])}
+  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ])}
   
   until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
   {
@@ -108,33 +108,17 @@ pkgs.writeShellScript "setup-flatpaks" ''
   done
 
   # deduplicate
-  # if [ -d $ACTIVE_DIR/data ]; then
-  #   echo "Deduplicating"
-  #   pushd $ACTIVE_DIR/data &>/dev/null
-  #   find . -type f | while read r; do
-  #     if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
-  #       ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
-  #       echo "$r deduplicated"
-  #     fi
-  #   done
-  #   popd &>/dev/null
-  # fi
-
-  # dedup() {
-  #   if cmp -s $ACTIVE_DIR/data/$1 $TARGET_DIR/data/$1; then
-  #     ln -f $ACTIVE_DIR/data/$1 $TARGET_DIR/data/$1
-  #     echo "$1 deduplicated"
-  #   fi
-  # }
-
-  # deduplicate
-  # if [ -d $ACTIVE_DIR/data ]; then
-  #   echo "Deduplicating"
-  #   pushd $ACTIVE_DIR/data &>/dev/null
-  #   find . -type f | parallel dedup "{}"
-  #   done
-  #   popd &>/dev/null
-  # fi
+  if [ -d $ACTIVE_DIR/data ]; then
+    echo "Deduplicating"
+    pushd $ACTIVE_DIR/data &>/dev/null
+    find . -type f | while read r; do
+      if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
+        ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
+        echo "$r deduplicated"
+      fi
+    done
+    popd &>/dev/null
+  fi
 
   # Install files
   echo "Installing files"
