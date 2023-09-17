@@ -9,7 +9,7 @@ let
 in
 
 pkgs.writeShellScript "setup-flatpaks" ''
-  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ])}
+  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils parallel ])}
   
   until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
   {
@@ -51,7 +51,8 @@ pkgs.writeShellScript "setup-flatpaks" ''
     sudo rmdir $MODULE_DATA_ROOT/boot/* 2>/dev/null || true
   fi
   
-  echo Running with boot ID $CURR_BOOTID
+  echo "Running with boot ID $CURR_BOOTID"
+  echo "An installation will be created at \"$TARGET_DIR\""
   mkdir -pm 755 $TARGET_DIR
   mkdir -pm 755 $INSTALL_TRASH_DIR
 
@@ -107,35 +108,54 @@ pkgs.writeShellScript "setup-flatpaks" ''
   done
 
   # deduplicate
-  if [ -d $ACTIVE_DIR/data ]; then
-    echo "Deduplicating"
-    pushd $ACTIVE_DIR/data &>/dev/null
-    find . -type f | while read r; do
-      if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
-        ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
-        echo "$r deduplicated"
-      fi
-    done
-    popd &>/dev/null
-  fi
+  # if [ -d $ACTIVE_DIR/data ]; then
+  #   echo "Deduplicating"
+  #   pushd $ACTIVE_DIR/data &>/dev/null
+  #   find . -type f | while read r; do
+  #     if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
+  #       ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
+  #       echo "$r deduplicated"
+  #     fi
+  #   done
+  #   popd &>/dev/null
+  # fi
+
+  # dedup() {
+  #   if cmp -s $ACTIVE_DIR/data/$1 $TARGET_DIR/data/$1; then
+  #     ln -f $ACTIVE_DIR/data/$1 $TARGET_DIR/data/$1
+  #     echo "$1 deduplicated"
+  #   fi
+  # }
+
+  # deduplicate
+  # if [ -d $ACTIVE_DIR/data ]; then
+  #   echo "Deduplicating"
+  #   pushd $ACTIVE_DIR/data &>/dev/null
+  #   find . -type f | parallel dedup "{}"
+  #   done
+  #   popd &>/dev/null
+  # fi
 
   # Install files
   echo "Installing files"
   [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR
   rm -rf $FLATPAK_DIR
-  mkdir -pm 755 $FLATPAK_DIR/overrides
+  mkdir -pm 755 $FLATPAK_DIR
+  mkdir -p $FLATPAK_DIR/overrides
   [ -d $INSTALL_TRASH_DIR/db ] && mv $INSTALL_TRASH_DIR/db $FLATPAK_DIR/db
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
   ln -s ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} $FLATPAK_DIR/overrides/${ref}
   '') (builtins.attrNames cfg.overrides))}
-  [ -d $TARGET_DIR/data/exports/bin ] && \
-    find $TARGET_DIR/data/exports/bin \
+  
+  # Dereference because exports are symlinks by default
+  [ -d $TARGET_DIR/data/exports ] && rsync -aL $TARGET_DIR/data/exports/ $TARGET_DIR/data/processed-exports
+  [ -d $TARGET_DIR/data/processed-exports/bin ] && \
+    find $TARGET_DIR/data/processed-exports/bin \
       -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR/data FLATPAK_SYSTEM_DIR=$TARGET_DIR/data exec flatpak run,gm" '{}' \;
-  [ -d $TARGET_DIR/data/exports/share/applications ] && \
-    find $TARGET_DIR/data/exports/share/applications \
+  [ -d $TARGET_DIR/data/processed-exports/share/applications ] && \
+    find $TARGET_DIR/data/processed-exports/share/applications \
       -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR/data FLATPAK_SYSTEM_DIR=$TARGET_DIR/data flatpak run,gm" '{}' \;
-  rm -rf $FLATPAK_DIR/exports
-  [ -d $TARGET_DIR/data/exports ] && rsync -aL $TARGET_DIR/data/exports/ $FLATPAK_DIR/exports
+  [ -d $TARGET_DIR/data/processed-exports ] && rsync -aL $TARGET_DIR/data/processed-exports/ $FLATPAK_DIR/exports
     
   for i in repo runtime app; do
     [ -e $TARGET_DIR/data/$i ] && ln -s $TARGET_DIR/data/$i $FLATPAK_DIR/$i
