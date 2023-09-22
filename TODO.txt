@@ -10,10 +10,12 @@
 
 <-> WORKING ON IT <->
 
-[ ] Deduplicate files
+[ ] option to block the boot process until all flatpaks have been installed
 
 <|| DONE ||>
 
+[X] option to disable dedupe
+[X] deduplicate files
 [X] out-of-tree flatpaks
 [X] consider the remote when diffing the installed packages
 --> fix bug with diffing when different branches are used
@@ -22,8 +24,8 @@
 [X] overrides
 [X] support for installing a specific commit of a ref
 [X] Separate by boot
-[X] Keep the flatpak install from previous boot, but clean old ones
-[X] Add a safety precaution in case the bootid changes, but the module didn't complete the update (and then GCs the only valid installation)
+[X] keep the flatpak install from previous boot, but clean old ones
+[X] add a safety precaution in case the bootid changes, but the module didn't complete the update (and then GCs the only valid installation)
 --> PREVENT THE ACTIVE GEN FROM BEING GC'D AT ALL COSTS UNTIL REBOOT
 
 <-< DROPPED >->
