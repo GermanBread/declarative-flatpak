@@ -23,6 +23,21 @@ in {
       Enable/disable this module.
     '';
   };
+  deduplicate = mkOption {
+    type = types.bool;
+    default = true;
+    description = mdDoc ''
+      Try to save space by deduplicating generations.
+
+      May take a very long time.
+    '';
+  };
+  # blockStartup = mkOption {
+  #   type = types.bool;
+  #   default = false;
+  #   description = mdDoc ''
+  #   '';
+  # };
   preInitCommand = mkOption {
     type = types.nullOr types.str;
     default = "";

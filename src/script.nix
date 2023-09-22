@@ -107,6 +107,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
 
+  ${if cfg.deduplicate then ''
   # deduplicate
   if [ -d $ACTIVE_DIR/data ]; then
     echo "Deduplicating"
@@ -119,6 +120,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
     done
     popd &>/dev/null
   fi
+  '' else ""}
 
   # Install files
   echo "Installing files"

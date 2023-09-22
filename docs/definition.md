@@ -7,6 +7,16 @@ config.services.flatpak.enable
 Enable/disable this module.
 If your NixOS config has `services.flatpak.enable` set to `true`, this module will be activated automatically.
 
+# services.flatpak.**deduplicate**
+## Default
+```nix
+true
+```
+## Description
+Try to save space by deduplicating generations.
+
+May take a very long time.
+
 # services.flatpak.**packages**
 ## Default
 ```nix
