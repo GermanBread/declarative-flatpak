@@ -25,7 +25,7 @@ in {
       description = "flathub pkg";
       check = x: if builtins.match "^${regex.fpkg}$" x != null then true else throw ''
         Hi there. Your package "${x}" needs to follow the naming scheme:
-          remote-name:type/package-name/arch/branch-name/commit
+          remote-name:type/package-name/arch/branch-name:commit
         
         Replace "remote-name" with the remote name you want to install from.
         Replace "type" with either "runtime" or "app".
