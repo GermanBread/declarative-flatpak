@@ -31,6 +31,14 @@ pkgs.writeShellScript "setup-flatpaks" ''
   export MODULE_DATA_ROOT=${config.xdg.stateHome}/flatpak-module
   export FLATPAK_DIR=${config.xdg.dataHome}/flatpak
   ''}
+  
+  # Now do some overrides
+  ${if cfg.state-dir != null then ''
+  export MODULE_DATA_ROOT=${cfg.state-dir}
+  '' else ""}
+  ${if cfg.target-dir != null then ''
+  export FLATPAK_DIR=${cfg.target-dir}
+  '' else ""}
 
   CURR_BOOTID=$(journalctl --list-boots --no-pager | grep -E '^ +0' | awk '{print$2}') || \
     CURR_BOOTID=1
@@ -125,7 +133,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
   # Install files
   echo "Installing files"
   [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR
-  rm -rf $FLATPAK_DIR
+  rm -rf $FLATPAK_DIR || echo "WARNING: Could not delete $FLATPAK_DIR"
   mkdir -pm 755 $FLATPAK_DIR
   [ -d $INSTALL_TRASH_DIR/db ] && mv $INSTALL_TRASH_DIR/db $FLATPAK_DIR/db
   mkdir -p $TARGET_DIR/data/overrides

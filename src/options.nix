@@ -32,6 +32,32 @@ in {
       May take a very long time.
     '';
   };
+  state-dir = mkOption {
+    type = types.nullOr types.path;
+    default = null;
+    description = mdDoc ''
+      Path where to place the flatpak generations
+
+      By default will be:
+      - /var/lib/flatpak-module (for NixOS)
+      - ~/.local/state/flatpak-module (for home-manager)
+
+      If left at default value, the corresponding directory will be picked.
+    '';
+  };
+  target-dir = mkOption {
+    type = types.nullOr types.path;
+    default = null;
+    description = mdDoc ''
+      Path where to link the flatpak file to.
+      
+      By default will be:
+      - /var/lib/flatpak (for NixOS)
+      - ~/.local/share/flatpak (for home-manager)
+
+      If left at default value, the corresponding directory will be picked.
+    '';
+  };
   # blockStartup = mkOption {
   #   type = types.bool;
   #   default = false;

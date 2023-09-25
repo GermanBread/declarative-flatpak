@@ -34,6 +34,9 @@
         ];
       };
     };
+    state-dir = "/yes";
+    target-dir = "/deployment";
+    deduplicate = false;
   };
 
   virtualisation = {
