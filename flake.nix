@@ -12,7 +12,7 @@
     };
   in {
     devShells.default = let 
-      script = pkgs.writeShellScriptBin "run-interactive-vm" ''
+      script = pkgs.writeShellScriptBin "run-vm" ''
         timeout() {
           seq 1 5 | while read r; do
             echo x
@@ -31,7 +31,7 @@
         }
         
         vm() {
-          pushd test &>/dev/null
+          pushd vm &>/dev/null
           nix flake update -v --inputs-from ../ 2>&1 | awk '
           {
             printf "\rUpdating flake"
