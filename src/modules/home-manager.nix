@@ -1,7 +1,7 @@
 { config, lib, pkgs, nixosConfig ? null, ... }:
 
 let
-  cfg = if nixosConfig == null then config.services.flatpak else config.services.flatpak // { enable = nixosConfig.services.flatpak.enable; };
+  cfg = if nixosConfig == null then config.services.flatpak else (config.services.flatpak // { enable = nixosConfig.services.flatpak.enable; });
 in 
 
 {
