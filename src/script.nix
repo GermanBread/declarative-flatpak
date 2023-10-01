@@ -56,7 +56,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
     find $MODULE_DATA_ROOT/boot -type d -mindepth 2 -maxdepth 2 \
       -not -exec test -e {}/keep \; -exec rm -rf {} \; \
       -o -not -exec grep "$CURR_BOOTID" {}/keep &>/dev/null \; -exec rm -rf {} \;
-    sudo rmdir $MODULE_DATA_ROOT/boot/* 2>/dev/null || true
+    rmdir $MODULE_DATA_ROOT/boot/* 2>/dev/null || true
   fi
   
   echo "Running with boot ID $CURR_BOOTID"
@@ -68,10 +68,6 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   export FLATPAK_USER_DIR=$TARGET_DIR/data
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
-
-  # if grep ${builtins.toJSON cfg.packages} $ACTIVE_DIR/pkgs &>/dev/null; then
-  #   cp -a $ACTIVE_DIR/data $TARGET_DIR/data
-  # fi
 
   ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
   echo "No remotes declared in config. Refusing to do anything."
@@ -155,11 +151,10 @@ pkgs.writeShellScript "setup-flatpaks" ''
     [ -e $TARGET_DIR/data/$i ] && ln -s $TARGET_DIR/data/$i $FLATPAK_DIR/$i
   done
 
-  echo ${builtins.toJSON cfg.packages} >$TARGET_DIR/pkgs
-
   unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
   
   ${cfg.postInitCommand}
 
   echo $TARGET_DIR  >$MODULE_DATA_ROOT/active
+  cat ${builtins.toJSON cfg} >$TARGET_DIR/config
 ''
