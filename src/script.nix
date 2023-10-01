@@ -128,7 +128,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   # Install files
   echo "Installing files"
-  [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR
+  [ -d $FLATPAK_DIR ] && mv $FLATPAK_DIR/* $INSTALL_TRASH_DIR || true
   rm -rf $FLATPAK_DIR || echo "WARNING: Could not delete $FLATPAK_DIR"
   mkdir -pm 755 $FLATPAK_DIR
   [ -d $INSTALL_TRASH_DIR/db ] && mv $INSTALL_TRASH_DIR/db $FLATPAK_DIR/db
@@ -156,5 +156,5 @@ pkgs.writeShellScript "setup-flatpaks" ''
   ${cfg.postInitCommand}
 
   echo $TARGET_DIR  >$MODULE_DATA_ROOT/active
-  cat ${builtins.toJSON cfg} >$TARGET_DIR/config
+  ln -s ${pkgs.writeText "flatpak-gen-config" (builtins.toJSON cfg)} $TARGET_DIR/config
 ''
