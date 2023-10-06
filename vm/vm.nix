@@ -37,6 +37,7 @@
     state-dir = "/yes";
     target-dir = "/deployment";
     deduplicate = false;
+    recycle-generation = true;
   };
 
   virtualisation = {

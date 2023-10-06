@@ -4,7 +4,7 @@
     # ...
     flatpaks.url = "github:GermanBread/declarative-flatpak/stable";
     # Please DO NOT override the "nixpkgs" input!
-    # Overriding "nixpkgs" is unsupported until stated otherwise.
+    # Overriding "nixpkgs" is unsupported unless stated otherwise.
     # ...
   };
 

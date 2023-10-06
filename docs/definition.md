@@ -44,6 +44,17 @@ By default will be:
 
 If left at default value, the corresponding directory will be picked.
 
+# services.flatpak.**recycle-generation**
+## Default
+```nix
+false
+```
+## Description
+Instead of creating a new generation from scratch, try to re-use the old generation but just run `flatpak update` on it.
+This might significantly reduce bandwidth usage.
+
+**WARNING:** EXPERIMENTAL /// MIGHT BE RISKY TO USE
+
 # services.flatpak.**packages**
 ## Default
 ```nix

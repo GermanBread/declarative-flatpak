@@ -58,6 +58,16 @@ in {
       If left at default value, the corresponding directory will be picked.
     '';
   };
+  recycle-generation = mkOption {
+    type = types.bool;
+    default = false;
+    description = mdDoc ''
+      Instead of creating a new generation from scratch, try to re-use the old generation but just run `flatpak update` on it.
+      This might significantly reduce bandwidth usage.
+
+      **WARNING:** EXPERIMENTAL /// MIGHT BE RISKY TO USE
+    '';
+  };
   # blockStartup = mkOption {
   #   type = types.bool;
   #   default = false;
@@ -99,11 +109,11 @@ in {
     type = types.attrsOf (types.submodule {
       options = {
         filesystems = mkOption {
-          type = types.nullOr (types.listOf types.string);
+          type = types.nullOr (types.listOf types.str);
           default = null;
         };
         sockets = mkOption {
-          type = types.nullOr (types.listOf types.string);
+          type = types.nullOr (types.listOf types.str);
           default = null;
         };
         environment = mkOption {
