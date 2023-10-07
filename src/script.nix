@@ -73,7 +73,13 @@ pkgs.writeShellScript "setup-flatpaks" ''
     echo "Re-using the current environment"
 
     rsync -a $ACTIVE_DIR/ $TARGET_DIR/
+    rm -f $TARGET_DIR/config
+
     flatpak ${builtins.toString fargs} update -y --noninteractive
+
+    # WARNING: PINNING IS BROKEN
+
+    flatpak uninstall -y --noninteractive --unused
   else
     ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
     echo "No remotes declared in config. Refusing to do anything."
@@ -99,7 +105,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
       flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
 
       if [ -n "$_commit" ]; then
-        flatpak update --commit="$_commit" $_id || echo "failed to update to commit \"$_commit\". Check if the commit is correct"
+        flatpak update --commit="$_commit" $_id || echo "failed to update to commit \"$_commit\". Check if the commit is correct - $_id"
       fi
     done
 

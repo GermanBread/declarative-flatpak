@@ -65,7 +65,7 @@ in {
       Instead of creating a new generation from scratch, try to re-use the old generation but just run `flatpak update` on it.
       This might significantly reduce bandwidth usage.
 
-      **WARNING:** EXPERIMENTAL /// MIGHT BE RISKY TO USE
+      **WARNING:** EXPERIMENTAL /// MIGHT BE RISKY TO USE /// PINNING IS BROKEN
     '';
   };
   # blockStartup = mkOption {

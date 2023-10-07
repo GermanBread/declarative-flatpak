@@ -8,6 +8,8 @@
 
 ==> PLANNED <==
 
+[ ] Move flatpak refs into the Nix store
+
 <-> WORKING ON IT <->
 
 [ ] option to block the boot process until all flatpaks have been installed
