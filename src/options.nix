@@ -106,22 +106,35 @@ in {
     '';
   };
   overrides = mkOption {
-    type = types.attrsOf (types.submodule {
-      options = {
-        filesystems = mkOption {
-          type = types.nullOr (types.listOf types.str);
-          default = null;
+    type = types.oneOf [
+      (types.attrsOf (types.submodule {
+        options = {
+          filesystems = mkOption {
+            type = types.nullOr (types.listOf types.str);
+            default = null;
+          };
+          sockets = mkOption {
+            type = types.nullOr (types.listOf types.str);
+            default = null;
+          };
+          environment = mkOption {
+            type = types.nullOr (types.attrsOf types.anything);
+            default = null;
+          };
         };
-        sockets = mkOption {
-          type = types.nullOr (types.listOf types.str);
-          default = null;
+      }))
+      (types.attrsOf (types.submodule {
+        options = {
+          source = mkOption {
+            type = types.path;
+          };
+          symlink = mkOption {
+            type = types.bool;
+            default = true;
+          };
         };
-        environment = mkOption {
-          type = types.nullOr (types.attrsOf types.anything);
-          default = null;
-        };
-      };
-    });
+      }))
+    ];
     default = {};
     example = ''
       services.flatpak.overrides = {
