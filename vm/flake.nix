@@ -15,9 +15,7 @@
     };
   in {
     nixosConfigurations.vm = nixpkgs.lib.makeOverridable nixpkgs.lib.nixosSystem rec {
-      pkgs = import nixpkgs {
-        inherit system;
-      };
+      pkgs = import nixpkgs import-config;
       inherit system;
       modules = [
         home-manager.nixosModules.home-manager
