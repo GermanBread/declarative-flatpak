@@ -10,7 +10,7 @@ in
   config = lib.mkIf cfg.enableModule {
     systemd.services."manage-system-flatpaks" = {
       description = "Manage system-wide flatpaks";
-      after = [
+      wants = [
         "network-online.target"
       ];
       wantedBy = [
