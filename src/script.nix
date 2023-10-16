@@ -79,7 +79,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
     # WARNING: PINNING IS BROKEN
 
-    flatpak uninstall -y --noninteractive --unused
+    flatpak uninstall -y --noninteractive --unused || echo "For some reason the uninstall step failed. Here be dragons..."
   else
     ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
     echo "No remotes declared in config. Refusing to do anything."
@@ -153,7 +153,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
   rm -rf $TARGET_DIR/data/overrides
   mkdir -p $TARGET_DIR/data/overrides
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
-  ln -s ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} $TARGET_DIR/data/overrides/${ref}
+  cat ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} >$TARGET_DIR/data/overrides/${ref}
   '') (builtins.attrNames cfg.overrides))}
   
   # First, make sure we didn't accidentally copy over the exports
