@@ -33,9 +33,6 @@
           "fallback-x11"
         ];
       };
-      "org.foo.bar" = {
-        source = "/somerandomfilethatdoesntexist";
-      };
     };
     state-dir = "/yes";
     target-dir = "/deployment";
