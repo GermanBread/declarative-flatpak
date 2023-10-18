@@ -147,4 +147,5 @@ in {
       Paths may not be escaped.
     '';
   };
+  enable-debug = mkEnableOption "Show more info.";
 }

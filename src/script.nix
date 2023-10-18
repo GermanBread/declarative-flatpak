@@ -9,6 +9,10 @@ let
 in
 
 pkgs.writeShellScript "setup-flatpaks" ''
+  ${if cfg.enable-debug then ''
+  set -v
+  '' else ""}
+  
   export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ])}
   
   until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
