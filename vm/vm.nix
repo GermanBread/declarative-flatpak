@@ -38,6 +38,7 @@
     target-dir = "/deployment";
     deduplicate = false;
     recycle-generation = true;
+    enable-debug = true;
   };
 
   virtualisation = {
