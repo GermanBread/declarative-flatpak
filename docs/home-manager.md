@@ -18,4 +18,16 @@
 }
 ```
 
-#### Alternatively, you can pass the module down to your `home.nix` (or any other file where needed) and import it there.
+**Warning**
+
+Do not import the module inside `home.nix`
+
+```nix
+{ pkgs, flakes, ... }: {
+   imports = [
+     # dont include here
+   ];
+}
+```
+
+Relevant issue: nix-community/nixvim#83

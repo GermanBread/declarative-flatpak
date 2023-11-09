@@ -17,5 +17,3 @@
   };
 }
 ```
-
-#### Alternatively, you can pass the module down to your `configuration.nix` (or any other file where needed) and import it there.
