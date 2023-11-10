@@ -64,7 +64,7 @@
       shellHook = ''
         # ln -sfT $(pwd) /tmp/flatpak-module-dev
         
-        echo -e "\033[31mRun run-interactive-vm to run your code\033[0m"
+        echo -e "\033[31mRun run-vm to run your code\033[0m"
       '';
       NIX_PATH="nixpkgs=${nixpkgs}";
     };
