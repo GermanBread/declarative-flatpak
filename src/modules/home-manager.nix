@@ -31,8 +31,9 @@ in
       start-service = lib.hm.dag.entryAfter ["writeBoundary"] ''
         export PATH=${lib.makeBinPath (with pkgs; [ systemd ])}:$PATH
 
+        $DRY_RUN_CMD systemctl --user daemon-reload
         $DRY_RUN_CMD systemctl is-system-running -q && \
-          systemctl --user start manage-user-flatpaks.service || true
+          systemctl --user enable --now manage-user-flatpaks.service || true
       '';
     };
 
