@@ -6,6 +6,9 @@ let
   fargs = if is-system-install then [ "--system" ] else [ "--user" ] ++ extra-flatpak-flags;
   cfg = config.services.flatpak;
   regex = (import ./lib/types.nix { inherit lib; }).regex;
+  filecfg = pkgs.writeText "flatpak-gen-config" (builtins.toJSON {
+    inherit (cfg) overrides packages preInitCommand postInitCommand remotes recycle-generation state-dir target-dir;
+  });
 in
 
 pkgs.writeShellScript "setup-flatpaks" ''
@@ -187,5 +190,5 @@ pkgs.writeShellScript "setup-flatpaks" ''
   ${cfg.postInitCommand}
 
   echo $TARGET_DIR  >$MODULE_DATA_ROOT/active
-  ln -sfT ${pkgs.writeText "flatpak-gen-config" (builtins.toJSON cfg)} $TARGET_DIR/config
+  ln -sfT ${filecfg} $TARGET_DIR/config
 ''
