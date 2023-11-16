@@ -6,14 +6,21 @@
     # Overriding "nixpkgs" is unsupported unless stated otherwise.
   };
 
-  outputs = { flatpaks }: {
-    nixosConfigurations.<host> = nixpkgs.lib.nixosSystem {
-      modules = [
-        flatpaks.nixosModules.default
-
-        ./configuration.nix
-      ];
+  outputs = { self, flatpaks, nixpkgs}: {
+    nixosConfigurations = {
+      flatpaks = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          flatpaks.nixosModules.default
+          ./configuration.nix
+        ];
+      };
     };
   };
 }
+```
+
+Build it using:
+```
+nixos-rebuild build --flake .#flatpaks
 ```
