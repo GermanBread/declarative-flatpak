@@ -76,6 +76,7 @@
   services.flatpak.enable = true;
   xdg.portal = {
     enable = true;
+    config.common.default = "*";
     extraPortals = with pkgs; [
       xdg-desktop-portal-kde
     ];
@@ -87,7 +88,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    tmux ncdu exa
+    tmux ncdu eza
   ];
 
   networking.networkmanager.enable = true;
