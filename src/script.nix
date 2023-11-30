@@ -7,7 +7,7 @@ let
   cfg = config.services.flatpak;
   regex = (import ./lib/types.nix { inherit lib; }).regex;
   filecfg = pkgs.writeText "flatpak-gen-config" (builtins.toJSON {
-    inherit (cfg) overrides packages preInitCommand postInitCommand remotes recycle-generation state-dir target-dir;
+    inherit (cfg) overrides packages preInitCommand postInitCommand remotes state-dir target-dir;
   });
 in
 

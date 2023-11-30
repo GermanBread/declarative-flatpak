@@ -14,7 +14,7 @@
       config.allowUnfree = true;
     };
   in {
-    nixosConfigurations.vm = nixpkgs.lib.makeOverridable nixpkgs.lib.nixosSystem rec {
+    nixosConfigurations.vm = nixpkgs.lib.makeOverridable nixpkgs.lib.nixosSystem {
       pkgs = import nixpkgs import-config;
       inherit system;
       modules = [
