@@ -58,16 +58,16 @@ in {
       If left at default value, the corresponding directory will be picked.
     '';
   };
-  recycle-generation = mkOption {
-    type = types.bool;
-    default = false;
-    description = mdDoc ''
-      Instead of creating a new generation from scratch, try to re-use the old generation but just run `flatpak update` on it.
-      This might significantly reduce bandwidth usage.
+  # recycle-generation = mkOption {
+  #   type = types.bool;
+  #   default = false;
+  #   description = mdDoc ''
+  #     Instead of creating a new generation from scratch, try to re-use the old generation but just run `flatpak update` on it.
+  #     This might significantly reduce bandwidth usage.
 
-      **WARNING:** EXPERIMENTAL /// MIGHT BE RISKY TO USE /// PINNING IS BROKEN
-    '';
-  };
+  #     **WARNING:** EXPERIMENTAL /// MIGHT BE RISKY TO USE /// PINNING IS BROKEN
+  #   '';
+  # };
   # blockStartup = mkOption {
   #   type = types.bool;
   #   default = false;

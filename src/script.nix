@@ -76,59 +76,46 @@ pkgs.writeShellScript "setup-flatpaks" ''
   export FLATPAK_USER_DIR=$TARGET_DIR/data
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
 
-  if ${if cfg.recycle-generation then "true" else "false"} && [ -e $ACTIVE_DIR/config ] &&  cmp -s $ACTIVE_DIR/config ${pkgs.writeText "flatpak-gen-config" (builtins.toJSON cfg)}; then
-    echo "Re-using the current environment"
+  ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
+  echo "No remotes declared in config. Refusing to do anything."
+  exit 0
+  '' else builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
+  echo "Adding remote ${name} with URL ${value}"
+  flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
+  '') cfg.remotes))}
 
-    rsync -a $ACTIVE_DIR/ $TARGET_DIR/
-    rm -f $TARGET_DIR/config
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${regex.ffile}$" x == null) cfg.packages)}; do
+    _remote=$(grep -Eo '^${regex.fremote}' <<< $i)
+    _id=$(grep -Eo '${regex.ftype}\/${regex.fref}\/${regex.farch}\/${regex.fbranch}(:${regex.fcommit})?' <<< $i)
+    _commit=$(grep -Eo ':${regex.fcommit}$' <<< $_id) || true
+    if [ -n "$_commit" ]; then
+      _commit=$(tail -c-$(($(wc -c <<< $_commit) - 1)) <<< $_commit)
+      _id=$(head -c-$(($(wc -c <<< $_commit) + 1)) <<< $_id)
+    fi
 
-    flatpak ${builtins.toString fargs} update -y --noninteractive
+    # echo R $_remote
+    # echo C $_commit
+    # echo I $_id
 
-    # WARNING: PINNING IS BROKEN
+    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
 
-    flatpak uninstall -y --noninteractive --unused || echo "For some reason the uninstall step failed. Here be dragons..."
-  else
-    ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
-    echo "No remotes declared in config. Refusing to do anything."
-    exit 0
-    '' else builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
-    echo "Adding remote ${name} with URL ${value}"
-    flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
-    '') cfg.remotes))}
+    if [ -n "$_commit" ]; then
+      flatpak update --commit="$_commit" $_id || echo "failed to update to commit \"$_commit\". Check if the commit is correct - $_id"
+    fi
+  done
 
-    for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${regex.ffile}$" x == null) cfg.packages)}; do
-      _remote=$(grep -Eo '^${regex.fremote}' <<< $i)
-      _id=$(grep -Eo '${regex.ftype}\/${regex.fref}\/${regex.farch}\/${regex.fbranch}(:${regex.fcommit})?' <<< $i)
-      _commit=$(grep -Eo ':${regex.fcommit}$' <<< $_id) || true
-      if [ -n "$_commit" ]; then
-        _commit=$(tail -c-$(($(wc -c <<< $_commit) - 1)) <<< $_commit)
-        _id=$(head -c-$(($(wc -c <<< $_commit) + 1)) <<< $_id)
-      fi
+  echo "Installing out-of-tree refs"
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpak$" x != null) cfg.packages)}; do
+    _id=$(grep -Eo ':.+\.flatpak$' <<< $i | tail -c+2)
 
-      # echo R $_remote
-      # echo C $_commit
-      # echo I $_id
+    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_id
+  done
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpakref$" x != null) cfg.packages)}; do
+    _remote=$(grep -Eo '^${regex.fremote}:' <<< $i | head -c-2)
+    _id=$(grep -Eo ':.+\.flatpakref$' <<< $i | tail -c+2)
 
-      flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
-
-      if [ -n "$_commit" ]; then
-        flatpak update --commit="$_commit" $_id || echo "failed to update to commit \"$_commit\". Check if the commit is correct - $_id"
-      fi
-    done
-
-    echo "Installing out-of-tree refs"
-    for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpak$" x != null) cfg.packages)}; do
-      _id=$(grep -Eo ':.+\.flatpak$' <<< $i | tail -c+2)
-
-      flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_id
-    done
-    for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpakref$" x != null) cfg.packages)}; do
-      _remote=$(grep -Eo '^${regex.fremote}:' <<< $i | head -c-2)
-      _id=$(grep -Eo ':.+\.flatpakref$' <<< $i | tail -c+2)
-
-      flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
-    done
-  fi
+    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
+  done
   
   ${if cfg.deduplicate then ''
   # Deduplicate
