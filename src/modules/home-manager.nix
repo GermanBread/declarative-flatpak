@@ -1,7 +1,11 @@
 { config, lib, pkgs, ... }@args:
 
 let
-  cfg = if args ? nixosConfig then (config.services.flatpak // { enable = args.nixosConfig.services.flatpak.enable; }) else config.services.flatpak;
+  cfg =
+    if args ? nixosConfig
+    then (config.services.flatpak // { enable = args.nixosConfig.services.flatpak.enable; })
+    else (config.services.flatpak // { enable = true; })
+    ;
 in 
 
 {
