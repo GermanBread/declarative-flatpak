@@ -147,7 +147,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
   rm -rf $TARGET_DIR/data/overrides
   mkdir -p $TARGET_DIR/data/overrides
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
-  cat ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} >$TARGET_DIR/data/overrides/${ref}
+  cp ${cfg.source} "$TARGET_DIR/data/overrides/${ref}"
   '') (builtins.attrNames cfg.overrides))}
   
   # First, make sure we didn't accidentally copy over the exports

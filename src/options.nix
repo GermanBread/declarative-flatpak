@@ -1,9 +1,12 @@
-{ lib, cfg }:
+{ lib, cfg, pkgs }:
 
 with lib;
 
 let
   custom-types = (import ./lib/types.nix { inherit lib; }).types;
+  ini = pkgs.formats.ini {
+    listToValue = lib.concatMapStringsSep ";" (lib.generators.mkValueStringDefault {});
+  };
 in {
   packages = mkOption {
     type = types.listOf custom-types.fpkg;
@@ -106,22 +109,37 @@ in {
     '';
   };
   overrides = mkOption {
-    type = types.attrsOf (types.submodule {
+    type = types.attrsOf (types.submodule ({config, ...}: {
       options = {
         filesystems = mkOption {
-          type = types.nullOr (types.listOf types.str);
-          default = null;
+          type = with types; listOf (oneOf [str path]);
+          default = [];
         };
         sockets = mkOption {
-          type = types.nullOr (types.listOf types.str);
-          default = null;
+          type = with types; listOf str;
+          default = [];
         };
         environment = mkOption {
-          type = types.nullOr (types.attrsOf types.anything);
-          default = null;
+          type = with types; attrsOf (oneOf [str path int]);
+          default = {};
+        };
+        metadata = mkOption {
+          type = with types; attrsOf (attrsOf anything);
+          internal = true;
+        };
+        source = mkOption {
+          type = types.path;
+          internal = true;
         };
       };
-    });
+
+      config.metadata = {
+        Context = {inherit (config) filesystems sockets;};
+        Environment = config.environment;
+      };
+
+      config.source = ini.generate "flatpak-override-${config._module.args.name}" config.metadata;
+    }));
     default = {};
     example = ''
       services.flatpak.overrides = {
@@ -131,7 +149,7 @@ in {
             "!~/Games/Heroic"
           ];
           environment = {
-            "MOZ_ENABLE_WAYLAND" = 1;
+            "MOZ_ENABLE_WAYLAND" = "1";
           };
           sockets = [
             "!x11"
