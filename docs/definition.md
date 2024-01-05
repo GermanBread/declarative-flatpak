@@ -3,6 +3,7 @@
 ```nix
 config.services.flatpak.enable
 ```
+(If home-manager used as NixOS module: Value is read from NixOS host config)
 ## Description
 Enable/disable this module.
 If your NixOS config has `services.flatpak.enable` set to `true`, this module will be activated automatically.
@@ -139,7 +140,7 @@ services.flatpak.overrides = {
 Overrides to apply.
 
 Paths prefixed with '!' will deny read permissions for that path, also applies to sockets.
-Paths may not be escaped.
+Paths have to be escaped manually.
 
 ## Note on overrides:
 
