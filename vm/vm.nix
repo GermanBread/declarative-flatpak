@@ -113,7 +113,7 @@
     initialPassword = "password";
     shell = pkgs.zsh;
   };
-  home-manager.users."user" = {
+  home-manager.users."user" = { lib, pkgs, nixosConfig, ... }: {
     imports = [
       flatpak.homeManagerModules.default
     ];
@@ -128,6 +128,7 @@
         "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
         "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
       };
+      enable-debug = true;
     };
 
     home.file.".zshrc".text = "";
@@ -135,7 +136,7 @@
     home.stateVersion = "22.11";
   };
 
-  boot.tmpOnTmpfs = true;
+  boot.tmp.useTmpfs = true;
 
   system.stateVersion = "22.05";
 }
