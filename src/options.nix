@@ -29,7 +29,7 @@ in {
     description = mdDoc ''
       Try to save space by deduplicating generations.
 
-      May take a very long time.
+      May take a very, very long time.
     '';
   };
   state-dir = mkOption {
@@ -74,22 +74,36 @@ in {
   #   description = mdDoc ''
   #   '';
   # };
-  preInitCommand = mkOption {
+  preRemotesCommand = mkOption {
     type = types.nullOr types.str;
     default = "";
     description = mdDoc ''
-      Which command(s) to run before installation.
+      Which commands to run before remoted are configured.
 
-      If left at the default value, nothing will be done.
+      All essential variables have been initialized by now.
     '';
   };
-  postInitCommand = mkOption {
+  preInstallCommand = mkOption {
     type = types.nullOr types.str;
     default = "";
     description = mdDoc ''
-      Which command(s) to run after installation.
+      Which commands to run before refs are installed.
+    '';
+  };
+  preDedupeCommand = mkOption {
+    type = types.nullOr types.str;
+    default = "";
+    description = mdDoc ''
+      Which commands to run before deduplication.
 
-      If left at the default value, nothing will be done.
+      Will run even if deduplication is disabled.
+    '';
+  };
+  preSwitchCommand = mkOption {
+    type = types.nullOr types.str;
+    default = "";
+    description = mdDoc ''
+      Which commands to run before the generation is activated.
     '';
   };
   remotes = mkOption {

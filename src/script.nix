@@ -7,7 +7,7 @@ let
   cfg = config.services.flatpak;
   regex = (import ./lib/types.nix { inherit lib; }).regex;
   filecfg = pkgs.writeText "flatpak-gen-config" (builtins.toJSON {
-    inherit (cfg) overrides packages preInitCommand postInitCommand remotes state-dir target-dir;
+    inherit (cfg) overrides packages remotes state-dir target-dir preRemotesCommand preInstallCommand preDedupeCommand preSwitchCommand;
   });
 in
 
@@ -61,8 +61,8 @@ pkgs.writeShellScript "setup-flatpaks" ''
     
     echo Cleaning old directories
     find $MODULE_DATA_ROOT/boot -type d -mindepth 2 -maxdepth 2 \
-      -not -exec test -e {}/keep \; -exec rm -rf {} \; \
-      -o -not -exec grep "$CURR_BOOTID" {}/keep &>/dev/null \; -exec rm -rf {} \;
+      -not -exec test -e {}/keep \; -exec rm -rf ${if cfg.enable-debug then "-v" else ""} {} \; \
+      -o -not -exec grep "$CURR_BOOTID" {}/keep &>/dev/null \; -exec rm -rf ${if cfg.enable-debug then "-v" else ""} {} \;
     rmdir $MODULE_DATA_ROOT/boot/* 2>/dev/null || true
   fi
   
@@ -71,10 +71,10 @@ pkgs.writeShellScript "setup-flatpaks" ''
   mkdir -pm 755 $TARGET_DIR
   mkdir -pm 755 $INSTALL_TRASH_DIR
 
-  ${cfg.preInitCommand}
-
   export FLATPAK_USER_DIR=$TARGET_DIR/data
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
+
+  ${cfg.preRemotesCommand}
 
   ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
   echo "No remotes declared in config. Refusing to do anything."
@@ -83,6 +83,8 @@ pkgs.writeShellScript "setup-flatpaks" ''
   echo "Adding remote ${name} with URL ${value}"
   flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
   '') cfg.remotes))}
+
+  ${cfg.preInstallCommand}
 
   for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${regex.ffile}$" x == null) cfg.packages)}; do
     _remote=$(grep -Eo '^${regex.fremote}' <<< $i)
@@ -116,6 +118,8 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
+
+  ${cfg.preDedupeCommand}
   
   ${if cfg.deduplicate then ''
   # Deduplicate
@@ -131,6 +135,8 @@ pkgs.writeShellScript "setup-flatpaks" ''
     popd &>/dev/null
   fi
   '' else "# Deduplication would have happened here"}
+
+  ${cfg.preSwitchCommand}
 
   echo "Installing files"
   
@@ -173,8 +179,6 @@ pkgs.writeShellScript "setup-flatpaks" ''
   done
 
   unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
-
-  ${cfg.postInitCommand}
 
   echo $TARGET_DIR  >$MODULE_DATA_ROOT/active
   ln -sfT ${filecfg} $TARGET_DIR/config

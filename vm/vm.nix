@@ -129,6 +129,11 @@
         "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
       };
       enable-debug = true;
+      deduplicate = false;
+      preRemotesCommand = "echo silly1";
+      preInstallCommand = "echo silly2";
+      preDedupeCommand = "echo silly3";
+      preSwitchCommand = "echo silly4";
     };
 
     home.file.".zshrc".text = "";

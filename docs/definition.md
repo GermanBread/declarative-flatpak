@@ -82,16 +82,25 @@ Replace `<arch>` with the CPU architecture, may be omitted (but the slash needs 
 Replace `<branch-name`> with the name of the application branch.
 Replace `<commit>` with a given commit, or leave it out entirely
 
-# services.flatpak.**preInitCommand**
+# services.flatpak.**preRemotesCommand**
 ## Description
-Which commands to run before installation.
+Which commands to run before remoted are configured.
 
-If left at the default value, nothing will be done.
+All essential variables have been initialized by now.
 
-# services.flatpak.**postInitCommand**
-Which commands to run after installation.
+# services.flatpak.**preInstallCommand**
+## Description
+Which commands to run before refs are installed.
 
-If left at the default value, nothing will be done.
+# services.flatpak.**preDedupeCommand**
+## Description
+Which commands to run before deduplication.
+
+Will run even if deduplication is disabled.
+
+# services.flatpak.**preSwitchCommand**
+## Description
+Which commands to run before the generation is activated.
 
 # services.flatpak.**remotes**
 ## Default
