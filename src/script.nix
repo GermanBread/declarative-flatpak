@@ -56,13 +56,13 @@ pkgs.writeShellScript "setup-flatpaks" ''
   INSTALL_TRASH_DIR=$MODULE_DATA_ROOT/boot/0/$(uuidgen)
 
   if [ -d $MODULE_DATA_ROOT/boot ]; then
-    echo "$CURR_BOOTID" >"$ACTIVE_DIR/$CURR_BOOTID"
-
+    [ -e $ACTIVE_DIR ] && \
+      echo "$CURR_BOOTID" >$ACTIVE_DIR/keep
+    
     echo Cleaning old directories
-    find $MODULE_DATA_ROOT/boot -mindepth 2 -maxdepth 2 -type d \
-      -not -exec test -e "{}/$CURR_BOOTID" \; \
-      -and \( -not -wholename "$ACTIVE_DIR*" \) \
-      -exec rm -rf ${if cfg.enable-debug then "-v" else ""} {} \;
+    find $MODULE_DATA_ROOT/boot -type d -mindepth 2 -maxdepth 2 \
+      -not -exec test -e {}/keep \; -exec rm -rf {} \; \
+      -o -not -exec grep "$CURR_BOOTID" {}/keep &>/dev/null \; -exec rm -rf {} \;
     rmdir $MODULE_DATA_ROOT/boot/* 2>/dev/null || true
   fi
   
