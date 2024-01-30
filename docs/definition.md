@@ -153,4 +153,4 @@ Paths have to be escaped manually.
 
 ## Note on overrides:
 
-If you want to apply specialised overrides, do so by running commands via postInitCommand
+If you want to apply specialised overrides, do so by running commands via preSwitchCommand
