@@ -5,7 +5,7 @@ let
 in
 
 {
-  options.services.flatpak = import ../options.nix { inherit lib cfg; };
+  options.services.flatpak = import ../options.nix { inherit lib cfg pkgs; };
 
   config = lib.mkIf cfg.enableModule {
     systemd.services."manage-system-flatpaks" = {
