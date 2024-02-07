@@ -106,6 +106,15 @@ in {
       Which commands to run before the generation is activated.
     '';
   };
+  UNCHECKEDpostEverythingCommand = mkOption {
+    type = types.nullOr types.str;
+    default = "";
+    description = mdDoc ''
+      Which commands to run before the generation is activated.
+
+      The error status of this command will NOT be checked. Errors that occur will NOT prevent the generation from being activated!
+    '';
+  };
   remotes = mkOption {
     type = custom-types.fremote;
     default = {};

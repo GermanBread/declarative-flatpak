@@ -182,4 +182,6 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   echo $TARGET_DIR  >$MODULE_DATA_ROOT/active
   ln -sfT ${filecfg} $TARGET_DIR/config
+
+  ${cfg.UNCHECKEDpostEverythingCommand}
 ''
