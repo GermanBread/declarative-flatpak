@@ -110,7 +110,7 @@ in {
     type = types.nullOr types.str;
     default = "";
     description = mdDoc ''
-      Which commands to run before the generation is activated.
+      Which commands to run after the script completed execution.
 
       The error status of this command will NOT be checked. Errors that occur will NOT prevent the generation from being activated!
     '';
