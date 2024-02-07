@@ -102,6 +102,12 @@ Will run even if deduplication is disabled.
 ## Description
 Which commands to run before the generation is activated.
 
+# services.flatpak.**UNCHECKEDpostEverythingCommand**
+## Description
+Which commands to run after the script completed execution.
+
+The error status of this command will NOT be checked. Errors that occur will NOT prevent the generation from being activated!
+
 # services.flatpak.**remotes**
 ## Default
 ```nix
