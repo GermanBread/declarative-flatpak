@@ -1,26 +1,28 @@
-{ config, lib, pkgs
-, is-system-install
-, extra-flatpak-flags ? [] }:
+{ cfg, config, lib, pkgs
+, is-system-install, extra-flatpak-flags ? [] }:
 
 let
+  inherit (pkgs) coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils callPackage writeShellScript writeText;
+  inherit (lib) makeBinPath;
+
+  
   fargs = if is-system-install then [ "--system" ] else [ "--user" ] ++ extra-flatpak-flags;
-  cfg = config.services.flatpak;
-  regex = (import ./lib/types.nix { inherit lib; }).regex;
-  filecfg = pkgs.writeText "flatpak-gen-config" (builtins.toJSON {
-    inherit (cfg) overrides packages remotes state-dir target-dir preRemotesCommand preInstallCommand preDedupeCommand preSwitchCommand;
+  regexes = (callPackage ./lib/types.nix {}).regexes;
+  filecfg = writeText "flatpak-gen-config" (builtins.toJSON {
+    inherit (cfg) overrides packages remotes state-dir target-dir preRemotesCommand preInstallCommand preSwitchCommand;
   });
 in
 
-pkgs.writeShellScript "setup-flatpaks" ''
+writeShellScript "setup-flatpaks" ''
   ${if cfg.enable-debug then ''
   set -v
   '' else ""}
   
-  export PATH=${lib.makeBinPath (with pkgs; [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ])}
+  export PATH=${makeBinPath [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ]}
   
   until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
   {
-    printf "Waiting for net (%d tries)\n", (NR)
+    printf "Waiting for net (%d tries)\n" (NR)
   }
   END {
     printf "Network connected.\n"
@@ -76,20 +78,17 @@ pkgs.writeShellScript "setup-flatpaks" ''
 
   ${cfg.preRemotesCommand}
 
-  ${if builtins.length (builtins.attrValues cfg.remotes) == 0 then ''
-  echo "No remotes declared in config. Refusing to do anything."
-  exit 0
-  '' else builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
+  ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
   echo "Adding remote ${name} with URL ${value}"
   flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
   '') cfg.remotes))}
 
   ${cfg.preInstallCommand}
 
-  for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${regex.ffile}$" x == null) cfg.packages)}; do
-    _remote=$(grep -Eo '^${regex.fremote}' <<< $i)
-    _id=$(grep -Eo '${regex.ftype}\/${regex.fref}\/${regex.farch}\/${regex.fbranch}(:${regex.fcommit})?' <<< $i)
-    _commit=$(grep -Eo ':${regex.fcommit}$' <<< $_id) || true
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${regexes.ffile}$" x == null) cfg.packages)}; do
+    _remote=$(grep -Eo '^${regexes.fremote}' <<< $i)
+    _id=$(grep -Eo '${regexes.ftype}\/${regexes.fref}\/${regexes.farch}\/${regexes.fbranch}(:${regexes.fcommit})?' <<< $i)
+    _commit=$(grep -Eo ':${regexes.fcommit}$' <<< $_id) || true
     if [ -n "$_commit" ]; then
       _commit=$(tail -c-$(($(wc -c <<< $_commit) - 1)) <<< $_commit)
       _id=$(head -c-$(($(wc -c <<< $_commit) + 1)) <<< $_id)
@@ -113,30 +112,15 @@ pkgs.writeShellScript "setup-flatpaks" ''
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_id
   done
   for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpakref$" x != null) cfg.packages)}; do
-    _remote=$(grep -Eo '^${regex.fremote}:' <<< $i | head -c-2)
+    _remote=$(grep -Eo '^${regexes.fremote}:' <<< $i | head -c-2)
     _id=$(grep -Eo ':.+\.flatpakref$' <<< $i | tail -c+2)
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
   done
 
-  ${cfg.preDedupeCommand}
-  
-  ${if cfg.deduplicate then ''
-  # Deduplicate
-  if [ -d $ACTIVE_DIR/data ]; then
-    echo "Deduplicating"
-    pushd $ACTIVE_DIR/data &>/dev/null
-    find . -type f | while read r; do
-      if cmp -s $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r; then
-        ln -f $ACTIVE_DIR/data/$r $TARGET_DIR/data/$r
-        echo "$r deduplicated"
-      fi
-    done
-    popd &>/dev/null
-  fi
-  '' else "# Deduplication would have happened here"}
-
   ${cfg.preSwitchCommand}
+
+  ostree prune --repo=$TARGET_DIR/data/repo || true
 
   echo "Installing files"
   
@@ -153,7 +137,7 @@ pkgs.writeShellScript "setup-flatpaks" ''
   rm -rf $TARGET_DIR/data/overrides
   mkdir -p $TARGET_DIR/data/overrides
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
-  cat ${pkgs.callPackage ./pkgs/overrides.nix { inherit cfg ref; }} >$TARGET_DIR/data/overrides/${ref}
+  cat ${callPackage ./pkgs/overrides.nix { inherit cfg ref; }} >$TARGET_DIR/data/overrides/${ref}
   '') (builtins.attrNames cfg.overrides))}
   
   # First, make sure we didn't accidentally copy over the exports

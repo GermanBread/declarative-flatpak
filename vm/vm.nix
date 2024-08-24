@@ -1,4 +1,4 @@
-{ pkgs, flatpak, ... }: {
+{ pkgs, ... }: {
   nixos-shell.mounts = {
     mountHome = false;
     mountNixProfile = false;
@@ -43,9 +43,8 @@
         ];
       };
     };
-    state-dir = "/yes";
-    # target-dir = "/deployment";
-    deduplicate = false;
+    state-dir = "/flatpak/state";
+    target-dir = "/flatpak/deploy";
     enable-debug = true;
   };
 
@@ -84,42 +83,12 @@
     };
   };
 
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  
   services.getty.autologinUser = "user";
   users.users."user" = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     initialPassword = "password";
     shell = pkgs.zsh;
-  };
-  home-manager.users."user" = { lib, pkgs, nixosConfig, ... }: {
-    imports = [
-      flatpak.homeManagerModules.default
-    ];
-
-    services.flatpak = {
-      packages = [
-        "flathub:app/de.shorsh.discord-screenaudio//stable"
-        # "flathub-beta:app/org.chromium.Chromium//beta"
-        # "flathub:app/com.usebottles.bottles//stable"
-      ];
-      remotes = {
-        "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
-        "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
-      };
-      enable-debug = true;
-      deduplicate = false;
-      preRemotesCommand = "echo silly1";
-      preInstallCommand = "echo silly2";
-      preDedupeCommand = "echo silly3";
-      preSwitchCommand = "echo silly4";
-    };
-
-    home.file.".zshrc".text = "";
-
-    home.stateVersion = "22.11";
   };
 
   boot.tmp.useTmpfs = true;

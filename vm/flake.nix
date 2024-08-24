@@ -13,20 +13,18 @@
 
   outputs = { self, nixpkgs, home-manager, flatpak, nixos-shell }: let
     system = "x86_64-linux";
-    import-config = {
-      inherit system;
-      config.allowUnfree = true;
-    };
   in {
     nixosConfigurations.shell = nixpkgs.lib.makeOverridable nixpkgs.lib.nixosSystem {
-      pkgs = import nixpkgs import-config;
       inherit system;
       modules = [
+        { nixpkgs.config.allowUnfree = true; }
+
         home-manager.nixosModules.home-manager
         nixos-shell.nixosModules.nixos-shell
         flatpak.nixosModules.default
 
         ./vm.nix
+        ./hm.nix
       ];
       specialArgs = {
         inherit flatpak;

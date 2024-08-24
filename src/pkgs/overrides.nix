@@ -1,6 +1,4 @@
-{ lib
-, pkgs
-, writeText
+{ writeText
 , cfg
 , ref }:
 

@@ -1,9 +1,8 @@
 { lib }:
 
-with lib;
-
 let
-  regex = rec {
+  inherit (lib) mkOptionType;
+  regexes = rec {
     ftype = "(runtime|app)";
     fref = "[a-zA-Z0-9._-]+";
     farch = "[0-9x_a-zA-Z-]*";
@@ -18,12 +17,12 @@ let
     fpkg = "${fpkgnet}|${fpkglocal}";
   };
 in {
-  inherit regex;
+  regexes = regexes;
   types = {
     fpkg = mkOptionType {
       name = "fpgk";
       description = "flathub pkg";
-      check = x: if builtins.match "^${regex.fpkg}$" x != null then true else throw ''
+      check = x: if builtins.match "^${regexes.fpkg}$" x != null then true else throw ''
         Hi there. Your package "${x}" needs to follow the naming scheme:
           remote-name:type/package-name/arch/branch-name:commit
         
@@ -37,7 +36,7 @@ in {
     fremote = mkOptionType {
       name = "fremote";
       description = "flathhub remote";
-      check = x: if builtins.all (elm: builtins.match "^${regex.fremote}$" elm != null) (builtins.attrNames x) then true else throw ''
+      check = x: if builtins.all (elm: builtins.match "^${regexes.fremote}$" elm != null) (builtins.attrNames x) then true else throw ''
         Hello again. Your remote "${x}" contains unallowed symbols.
         It may only contain characters from a to z (upper and lowercase), numbers and hyphens (-).
       '';
