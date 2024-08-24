@@ -10,4 +10,5 @@ When imported, new options will be made available under `services.flatpak`. Plea
 
 Read [here](docs/branches.md) on how branches are named.
 
-**Warning** Your setup must be able to hold the size of your flatpak installation at least twice.
+> [!NOTE]
+> Your setup must be able to hold the size of your flatpak installation at least twice.
