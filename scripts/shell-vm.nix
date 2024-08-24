@@ -20,14 +20,7 @@ writeShellScriptBin "run-shell" ''
   
   vm() {
     pushd vm &>/dev/null
-    nix flake update -v --inputs-from ../ 2>&1 | awk '
-    {
-      printf "\rUpdating flake"
-    }
-    END {
-      printf "\rDone\033[0K\n"
-    }
-    '
+    nix flake lock --update-input flatpak 2>&1
     nixos-shell --flake .#shell -I nixpkgs=${inputs.nixpkgs}
     popd &>/dev/null
   }

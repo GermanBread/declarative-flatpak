@@ -8,7 +8,7 @@ mkShell {
     gawk
     jq
 
-    (callPackage ./scripts/nixos-shell-vm.nix { inherit inputs; })
+    (callPackage ./scripts/shell-vm.nix { inherit inputs; })
   ];
   shellHook = ''
     echo -e "\033[31mrun-shell\033[0m to run your code in nixos-shell"
