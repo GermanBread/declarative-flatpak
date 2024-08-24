@@ -20,14 +20,18 @@ writeShellScript "setup-flatpaks" ''
   
   export PATH=${makeBinPath [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ]}
   
-  until ping -c1 github.com &>/dev/null; do echo x; sleep 1; done | awk '
-  {
-    printf "Waiting for net (%d tries)\n" (NR)
-  }
-  END {
-    printf "Network connected.\n"
-  }
-  '
+  # Failsafe
+  _count=0
+  until ping -c1 github.com &>/dev/null; do
+    if [ $_count -ge 60 ]; then
+      echo "Failed to acquire an internet connection in 60 seconds."
+      exit 1
+    fi
+    _count=$(($_count + 1))
+    sleep 1
+  done
+  unset _count
+  echo "Internet connected"
 
   set -eu
 
@@ -72,9 +76,21 @@ writeShellScript "setup-flatpaks" ''
   echo "An installation will be created at \"$TARGET_DIR\""
   mkdir -pm 755 $TARGET_DIR
   mkdir -pm 755 $INSTALL_TRASH_DIR
+  mkdir -p $TARGET_DIR/data
 
   export FLATPAK_USER_DIR=$TARGET_DIR/data
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
+
+  # "steal" the repo from last install
+  if [ -e $ACTIVE_DIR/data/repo/.maxsize ] && [ $(du -s $ACTIVE_DIR/data/repo | awk '{print$1}') -lt $(cat $ACTIVE_DIR/data/repo/.maxsize) ]; then
+    echo "Repo size is within bounds. We can reuse the repo from the previous generation!"
+    cp -al $ACTIVE_DIR/data/repo $TARGET_DIR/data/repo
+    ostree remote list --repo=$TARGET_DIR/data/repo | while read r; do
+      ostree remote delete --repo=$TARGET_DIR/data/repo --if-exists $r
+    done
+  else
+    ostree init --repo=$TARGET_DIR/data/repo
+  fi
 
   ${cfg.preRemotesCommand}
 
@@ -121,6 +137,16 @@ writeShellScript "setup-flatpaks" ''
   ${cfg.preSwitchCommand}
 
   ostree prune --repo=$TARGET_DIR/data/repo || true
+  
+  # I don't know why ostree doesn't purge unused flatpaks
+  if [ ! -e $TARGET_DIR/data/repo/.maxsize ]; then
+    # Allow the repo to double in size
+    # if it gets any bigger than that, start over from scratch
+    echo "Setting max fs size bounds for repo"
+    _reposize=$(du -s $TARGET_DIR/data/repo | awk '{print$1}')
+    echo $(($_reposize * 2)) >$TARGET_DIR/data/repo/.maxsize
+    unset _reposize
+  fi
 
   echo "Installing files"
   
