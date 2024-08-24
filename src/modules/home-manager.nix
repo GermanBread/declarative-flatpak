@@ -18,7 +18,7 @@ in
 
   config.systemd.user.services."manage-user-flatpaks" = mkIf cfg.enableModule {
     Unit = {
-      After = [
+      Wants = [
         "network.target"
       ];
     };
