@@ -1,13 +1,12 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
-    home-manager.url = "github:nix-community/home-manager/release-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     utils.url = "github:numtide/flake-utils";
     
     flatpak.url = "./..";
   };
 
-  outputs = { self, nixpkgs, utils, home-manager, flatpak }: utils.lib.eachDefaultSystem (system: let 
+  outputs = { self, nixpkgs, utils, flatpak }: utils.lib.eachDefaultSystem (system: let 
     pkgs = import nixpkgs {
       inherit system;
     };

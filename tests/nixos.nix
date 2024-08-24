@@ -16,6 +16,7 @@ nixosTest {
         extraPortals = with pkgs; [
           xdg-desktop-portal-kde
         ];
+        config.common.default = "*";
       };
     };
     disabled = { config, pkgs, ... }: {
@@ -33,24 +34,20 @@ nixosTest {
         extraPortals = with pkgs; [
           xdg-desktop-portal-kde
         ];
+        config.common.default = "*";
       };
     };
-    pkgs = { config, pkgs, ... }: {
+    installation = { config, pkgs, ... }: {
       imports = [
         modules.flatpak
       ];
 
-      networking.dhcpcd.enable = true;
-      
       services.flatpak = {
         enable = true;
+        target-dir = "/target";
         packages = [
-          "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08:9ee91f5c7944516169bb7a327d81ac7b08b149b3cd238b7a11a61bc1abe28ba9"
-          "flathub:app/org.kde.index//stable"
+          ":${../vm/xwaylandvideobridge.flatpak}"
         ];
-        remotes = {
-          "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
-        };
       };
 
       xdg.portal = {
@@ -58,6 +55,7 @@ nixosTest {
         extraPortals = with pkgs; [
           xdg-desktop-portal-kde
         ];
+        config.common.default = "*";
       };
 
       virtualisation = {
@@ -84,18 +82,21 @@ nixosTest {
         extraPortals = with pkgs; [
           xdg-desktop-portal-kde
         ];
+        config.common.default = "*";
       };
     };
-    recycle_gen = { config, pkgs, ... }: {
+    persist = { config, pkgs, ... }: {
       imports = [
         modules.flatpak
       ];
 
-      networking.dhcpcd.enable = true;
-
       services.flatpak = {
         enable = true;
-        recycle-generation = true;
+        target-dir = "/target";
+        UNCHECKEDpostEverythingCommand = ''
+          touch /target/repo/thisfileshouldpersist
+          touch /target/thisfileshouldnotpersist
+        '';
       };
 
       xdg.portal = {
@@ -103,6 +104,7 @@ nixosTest {
         extraPortals = with pkgs; [
           xdg-desktop-portal-kde
         ];
+        config.common.default = "*";
       };
     };
   };
@@ -111,19 +113,30 @@ nixosTest {
     disabled.wait_for_unit("network-online.target")
     disabled.succeed("which flatpak")
     disabled.fail("systemctl status --no-pager manage-system-flatpaks.service")
+    disabled.shutdown()
   
     bare.wait_for_unit("network-online.target")
     bare.succeed("which flatpak")
     bare.succeed("systemctl status --no-pager manage-system-flatpaks.service")
+    bare.shutdown()
 
-    custom_dirs.wait_for_file("/state")
-    custom_dirs.wait_for_file("/target")
+    custom_dirs.wait_for_unit("manage-system-flatpaks.service")
+    custom_dirs.wait_for_file("/state", timeout=60)
+    custom_dirs.wait_for_file("/target", timeout=60)
+    custom_dirs.succeed("stat /state")
+    custom_dirs.succeed("stat /target")
+    custom_dirs.shutdown()
   
-    recycle_gen.start(allow_reboot=True)
-    recycle_gen.wait_until_succeeds("journalctl -u manage-system-flatpaks.service -g \"ID $(journalctl --list-boots --no-pager | grep -E '^ +0' | awk '{print$2}')\"")
-    recycle_gen.reboot()
-    recycle_gen.wait_until_succeeds("journalctl -u manage-system-flatpaks.service -g \"ID $(journalctl --list-boots --no-pager | grep -E '^ +0' | awk '{print$2}')\"")
-    recycle_gen.succeed("journalctl -u manage-system-flatpaks.service -g Re-using the current environment")
-    recycle_gen.shutdown()
+    persist.start(allow_reboot=True)
+    persist.wait_for_unit("manage-system-flatpaks.service")
+    persist.wait_for_file("/target", timeout=60)
+    persist.succeed("stat /target/repo/thisfileshouldpersist")
+    persist.succeed("stat /target/thisfileshouldnotpersist")
+    persist.reboot()
+    persist.wait_for_unit("manage-system-flatpaks.service")
+    persist.wait_for_file("/target", timeout=60)
+    persist.succeed("stat /target/repo/thisfileshouldpersist")
+    persist.fail("stat /target/thisfileshouldnotpersist")
+    persist.shutdown()
   '';
 }
