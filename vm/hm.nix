@@ -1,6 +1,6 @@
 { flatpak, ... }: {
   home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
+  home-manager.useUserPackages = false;
   
   home-manager.users."user" = { config, ... }: {
     imports = [
@@ -16,9 +16,8 @@
         "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
         "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
       };
-      enable-debug = true;
-      state-dir = "${config.home.homeDirectory}/flatpak/state";
-      target-dir = "${config.home.homeDirectory}/flatpak/deploy";
+      flatpak-dir = "${config.home.homeDirectory}/flatpak";
+      debug = true;
     };
 
     home.file.".zshrc".text = "";

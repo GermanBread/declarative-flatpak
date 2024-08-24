@@ -21,26 +21,13 @@ Try to save space by deduplicating generations.
 
 May take a very long time.
 
-# services.flatpak.**state-dir**
+# services.flatpak.**flatpak-dir**
 ## Default
 ```nix
 null
 ```
 ## Description
-Path where to place the flatpak generations
-
-By default will be:
-- `/var/lib/flatpak-module` (for NixOS)
-- `~/.local/state/flatpak-module` (for home-manager)
-
-If left at default value, the corresponding directory will be picked.
-# services.flatpak.**target-dir**
-## Default
-```nix
-null
-```
-## Description
-Path where to link the flatpak file to.
+Path where your flatpak installation is located.
 
 By default will be:
 - `/var/lib/flatpak` (for NixOS)

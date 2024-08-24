@@ -10,6 +10,7 @@ let
   inherit ((callPackage ./lib/types.nix {}).types) fpkg fremote;
 in {
   imports = [
+    ./renames.nix
     ./removes.nix
   ];
   
@@ -32,20 +33,7 @@ in {
         Enable/disable this module.
       '';
     };
-    state-dir = mkOption {
-      type = nullOr path;
-      default = null;
-      description = mdDoc ''
-        Path where to place the flatpak generations
-
-        By default will be:
-        - /var/lib/flatpak-module (for NixOS)
-        - ~/.local/state/flatpak-module (for home-manager)
-
-        If left at default value, the corresponding directory will be picked.
-      '';
-    };
-    target-dir = mkOption {
+    flatpak-dir = mkOption {
       type = nullOr path;
       default = null;
       description = mdDoc ''
@@ -151,6 +139,6 @@ in {
         Paths may not be escaped.
       '';
     };
-    enable-debug = mkEnableOption "Show more info.";
+    debug = mkEnableOption "Show more info.";
   };
 }

@@ -43,9 +43,8 @@
         ];
       };
     };
-    state-dir = "/flatpak/state";
-    target-dir = "/flatpak/deploy";
-    enable-debug = true;
+    flatpak-dir = "/flatpak";
+    debug = true;
   };
 
   # Dev env stuff
