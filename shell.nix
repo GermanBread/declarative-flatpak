@@ -12,8 +12,6 @@ mkShell {
     (callPackage ./scripts/nixos-shell-vm.nix { inherit inputs; })
   ];
   shellHook = ''
-    # ln -sfT $(pwd) /tmp/flatpak-module-dev
-    
     echo -e "\033[31mrun-shell\033[0m to run your code in nixos-shell"
     echo -e "\033[31mrun-nxos\033[0m to run your code in a test nixos system"
   '';
