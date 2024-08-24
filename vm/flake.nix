@@ -8,7 +8,7 @@
     nixos-shell.inputs."nixpkgs".follows = "nixpkgs";
     home-manager.inputs."nixpkgs".follows = "nixpkgs";
 
-    flatpak.url = "./..";
+    flatpak.url = "./.."; # "github:GermanBread/declarative-flatpak/stable"; # for testing purposes
   };
 
   outputs = { self, nixpkgs, home-manager, flatpak, nixos-shell }: let
