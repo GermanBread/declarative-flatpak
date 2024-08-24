@@ -1,18 +1,18 @@
->>- CONSIDERING, BUT NOT PLANNED -<<
+>>- CONSIDERING -<<
 
 [ ] use a fetcher, allowing us to move the flatpak itself into the store
-
+[ ] Move flatpak refs into the Nix store
 [ ] opt-in telemetry for "stable" branch
 [ ] opt-out telemetry for "dev" branch
 --> requires branch detection code
 
 ==> PLANNED <==
 
-[ ] Move flatpak refs into the Nix store
+[ ] option to block the boot process until all flatpaks have been installed
 
 <-> WORKING ON IT <->
 
-[ ] option to block the boot process until all flatpaks have been installed
+[ ] do as much as possible without the flatpak cli, using ostree cli instead
 
 <|| DONE ||>
 
