@@ -76,21 +76,24 @@ writeShellScript "setup-flatpaks" ''
   echo "An installation will be created at \"$TARGET_DIR\""
   mkdir -pm 755 $TARGET_DIR
   mkdir -pm 755 $INSTALL_TRASH_DIR
-  mkdir -p $TARGET_DIR/data
+  mkdir -pm 755 $TARGET_DIR/data
 
   export FLATPAK_USER_DIR=$TARGET_DIR/data
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
 
   # "steal" the repo from last install
-  if [ -e $ACTIVE_DIR/data/repo/.maxsize ] && [ $(du -s $ACTIVE_DIR/data/repo | awk '{print$1}') -lt $(cat $ACTIVE_DIR/data/repo/.maxsize) ]; then
-    echo "Repo size is within bounds. We can reuse the repo from the previous generation!"
+  if [ -e $ACTIVE_DIR/data/repo ]; then
     cp -al $ACTIVE_DIR/data/repo $TARGET_DIR/data/repo
     ostree remote list --repo=$TARGET_DIR/data/repo | while read r; do
       ostree remote delete --repo=$TARGET_DIR/data/repo --if-exists $r
     done
+    # needed for prune
+    rm -rf $TARGET_DIR/data/repo/refs/heads/deploy
+    rm -rf $TARGET_DIR/data/repo/refs/remotes/*
   else
-    ostree init --repo=$TARGET_DIR/data/repo
+    ostree init --repo=$TARGET_DIR/data/repo --mode=bare-user-only
   fi
+
 
   ${cfg.preRemotesCommand}
 
@@ -103,7 +106,7 @@ writeShellScript "setup-flatpaks" ''
 
   for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${regexes.ffile}$" x == null) cfg.packages)}; do
     _remote=$(grep -Eo '^${regexes.fremote}' <<< $i)
-    _id=$(grep -Eo '${regexes.ftype}\/${regexes.fref}\/${regexes.farch}\/${regexes.fbranch}(:${regexes.fcommit})?' <<< $i)
+    _id=$(grep -Eo '${regexes.ftype}/${regexes.fref}/${regexes.farch}/${regexes.fbranch}(:${regexes.fcommit})?' <<< $i)
     _commit=$(grep -Eo ':${regexes.fcommit}$' <<< $_id) || true
     if [ -n "$_commit" ]; then
       _commit=$(tail -c-$(($(wc -c <<< $_commit) - 1)) <<< $_commit)
@@ -136,18 +139,9 @@ writeShellScript "setup-flatpaks" ''
 
   ${cfg.preSwitchCommand}
 
+  ostree prune --repo=$TARGET_DIR/data/repo --refs-only || true
   ostree prune --repo=$TARGET_DIR/data/repo || true
   
-  # I don't know why ostree doesn't purge unused flatpaks
-  if [ ! -e $TARGET_DIR/data/repo/.maxsize ]; then
-    # Allow the repo to double in size
-    # if it gets any bigger than that, start over from scratch
-    echo "Setting max fs size bounds for repo"
-    _reposize=$(du -s $TARGET_DIR/data/repo | awk '{print$1}')
-    echo $(($_reposize * 2)) >$TARGET_DIR/data/repo/.maxsize
-    unset _reposize
-  fi
-
   echo "Installing files"
   
   # Move the current "installation" into the bin
