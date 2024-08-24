@@ -2,17 +2,17 @@
   systemd.services.NetworkManager-wait-online.enable = false;
 
   services.flatpak = {
-    packages = [
+    packages = [ # comment these out at random
       "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08:9ee91f5c7944516169bb7a327d81ac7b08b149b3cd238b7a11a61bc1abe28ba9"
-      # "flathub-beta:runtime/com.valvesoftware.Steam.Utility.vkBasalt//beta" # this runtime is cursed for some reason
-      # "flathub:app/org.kde.index//stable"
+      "flathub-beta:runtime/com.valvesoftware.Steam.Utility.vkBasalt//beta" # this runtime is cursed for some reason
+      "flathub:app/org.kde.index//stable"
       
-      # "flathub-beta:app/org.mozilla.firefox//stable"
+      "flathub-beta:app/org.mozilla.firefox//stable"
       
-      # "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
+      "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
 
-      # "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
-      # ":${./xwaylandvideobridge.flatpak}"
+      "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
+      ":${./xwaylandvideobridge.flatpak}"
     ];
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
@@ -35,38 +35,15 @@
       };
     };
     state-dir = "/yes";
-    target-dir = "/deployment";
+    # target-dir = "/deployment";
     deduplicate = false;
     enable-debug = true;
-  };
-
-  virtualisation = {
-    cores = 8;
-    memorySize = 8096 * 2;
-    diskSize = 16 * 1024;
   };
 
   # Dev env stuff
   environment.loginShellInit = ''
     trap 'sudo poweroff' EXIT
   '';
-  #virtualisation.sharedDirectories = {
-  #  "source" = {
-  #    target = "/src";
-  #    source = "/tmp/flatpak-module-dev";
-  #  };
-  #};
-  #systemd.paths."hot-reload" = {
-  #  pathConfig = {
-  #    "PathModified" = "/src";
-  #    "Unit" = [ "hot-restart.service" ];
-  #  };
-  #};
-  #systemd.services."hot-restart" = {
-  #  script = ''
-  #    systemctl poweroff
-  #  '';
-  #};
 
   security.sudo = {
     enable = true;
@@ -80,11 +57,6 @@
     extraPortals = with pkgs; [
       xdg-desktop-portal-kde
     ];
-  };
-
-  nixos-shell.mounts = {
-    mountHome = false;
-    mountNixProfile = false;
   };
 
   environment.systemPackages = with pkgs; [
