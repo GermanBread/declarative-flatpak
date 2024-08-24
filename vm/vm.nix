@@ -1,5 +1,14 @@
 { pkgs, flatpak, ... }: {
-  systemd.services.NetworkManager-wait-online.enable = false;
+  nixos-shell.mounts = {
+    mountHome = false;
+    mountNixProfile = false;
+  };
+
+  virtualisation = {
+    cores = 8;
+    memorySize = 8096 * 2;
+    diskSize = 64 * 1024;
+  };
 
   services.flatpak = {
     packages = [ # comment these out at random

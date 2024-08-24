@@ -26,23 +26,6 @@
         nixos-shell.nixosModules.nixos-shell
         flatpak.nixosModules.default
 
-        ./shell.nix
-        ./vm.nix
-      ];
-      specialArgs = {
-        inherit flatpak;
-      };
-    };
-    nixosConfigurations.nixos = nixpkgs.lib.makeOverridable nixpkgs.lib.nixosSystem {
-      pkgs = import nixpkgs import-config;
-      inherit system;
-      modules = [
-        home-manager.nixosModules.home-manager
-        flatpak.nixosModules.default
-
-        "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
-
-        ./nixos.nix
         ./vm.nix
       ];
       specialArgs = {
