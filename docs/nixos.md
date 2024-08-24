@@ -26,6 +26,6 @@
   };
 }
 ```
-
-This example is not a fully functional config.
+> [!NOTE]
+> This example is not a fully functional config.
 It is rather a guide to show you where you should import the module in your `flake.nix`.

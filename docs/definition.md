@@ -8,8 +8,8 @@ config.services.flatpak.enable
 Enable/disable this module.
 If your NixOS config has `services.flatpak.enable` set to `true`, this module will be activated automatically.
 
-## Warning
-The home-manager module will try to read the value of `services.flatpak.enable` from the **NixOS host**, it will never provide it's own `services.flatpak.enable` option, you will have to set `services.flatpak.enableModule` in your user config if you use home-manager as standalone.
+> [!IMPORTANT]
+> The home-manager module will try to read the value of `services.flatpak.enable` from the **NixOS host**, it will never provide it's own `services.flatpak.enable` option, you will have to set `services.flatpak.enableModule` in your user config if you use home-manager as standalone.
 
 # services.flatpak.**deduplicate**
 ## Default

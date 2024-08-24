@@ -26,20 +26,17 @@
   };
 }
 ```
-
-This example is not a fully functional config.
+> [!NOTE]
+> This example is not a fully functional config.
 It is rather a guide to show you where you should import the module in your `flake.nix`.
 
-**Warning**
-
-Do not import the module inside `home.nix`
-
-```nix
-{ pkgs, flakes, ... }: {
-   imports = [
-     # dont include here
-   ];
-}
-```
-
-Relevant issue: nix-community/nixvim#83
+> [!CAUTION]
+> Do not import the module inside `home.nix`
+> ```nix
+> { pkgs, flakes, ... }: {
+>    imports = [
+>      # dont include here
+>    ];
+> }
+> ```
+> Relevant issue: nix-community/nixvim#83
