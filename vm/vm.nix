@@ -43,8 +43,8 @@
         ];
       };
     };
-    flatpak-dir = "/flatpak";
-    debug = true;
+    # flatpak-dir = "/flatpak";
+    # debug = true;
   };
 
   # Dev env stuff
