@@ -75,7 +75,7 @@ writeShellScript "setup-flatpaks" ''
   mkdir -pm 755 "$TRASH_DIR"
 
   # "steal" the repo from last install
-  if [ -d "$FLATPAK_DIR/repo" ]; then
+  if [ -d "$FLATPAK_DIR/repo" ] && [ ! -L "$FLATPAK_DIR/repo" ]; then
     cp -al "$FLATPAK_DIR/repo" "$TARGET_DIR/repo"
     ostree remote list --repo="$TARGET_DIR/repo" | while read r; do
       ostree remote delete --repo="$TARGET_DIR/repo" --if-exists $r
