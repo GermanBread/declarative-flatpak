@@ -65,9 +65,10 @@ writeShellScript "setup-flatpaks" ''
   # --- END VARIABLES ---
 
   rm -rf "$TARGET_DIR"
-  find "$DATA_DIR/trash" -mindepth 1 -maxdepth 1 -not -name "$CURR_BOOTID" | while read r; do
-    rm -rf "$r"
-  done
+  [ -d "$DATA_DIR/trash" ] && \
+    find "$DATA_DIR/trash" -mindepth 1 -maxdepth 1 -not -name "$CURR_BOOTID" | while read r; do
+      rm -rf "$r"
+    done
   
   mkdir -pm 755 "$DATA_DIR"
   mkdir -pm 755 "$TARGET_DIR"
@@ -91,7 +92,7 @@ writeShellScript "setup-flatpaks" ''
 
   ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
   echo "Adding remote ${name} with URL ${value}"
-  flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value} &>"$DATA_DIR/flatpak.log" || cat "$DATA_DIR/flatpak.log"
+  flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
   '') cfg.remotes))}
 
   ${cfg.preInstallCommand}
@@ -109,12 +110,11 @@ writeShellScript "setup-flatpaks" ''
     # echo C $_commit
     # echo I $_id
 
-    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id &>"$DATA_DIR/flatpak.log" || cat "$DATA_DIR/flatpak.log"
+    flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
 
     if [ -n "$_commit" ]; then
-      if ! flatpak update --commit="$_commit" $_id &>"$DATA_DIR/flatpak.log"; then
+      if ! flatpak update --commit="$_commit" $_id; then
         echo "failed to update to commit \"$_commit\". Check if the commit is correct - $_id"
-        cat "$DATA_DIR/flatpak.log"
       fi
     fi
   done
@@ -175,7 +175,6 @@ writeShellScript "setup-flatpaks" ''
   done
 
   rm -rf "$TARGET_DIR"
-  rm -f "$DATA_DIR/flatpak.log"
 
   ln -sfT ${filecfg} "$DATA_DIR/config"
 
