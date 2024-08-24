@@ -81,6 +81,8 @@ writeShellScript "setup-flatpaks" ''
   export FLATPAK_USER_DIR=$TARGET_DIR/data
   export FLATPAK_SYSTEM_DIR=$TARGET_DIR/data
 
+  ln -sfT $TARGET_DIR $MODULE_DATA_ROOT/build
+
   # "steal" the repo from last install
   if [ -e $ACTIVE_DIR/data/repo ]; then
     cp -al $ACTIVE_DIR/data/repo $TARGET_DIR/data/repo
