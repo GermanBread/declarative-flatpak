@@ -37,17 +37,14 @@ nixosTest {
         config.common.default = "*";
       };
     };
-    installation = { config, pkgs, ... }: {
+    custom_dirs = { config, pkgs, ... }: {
       imports = [
         modules.flatpak
       ];
-
+      
       services.flatpak = {
         enable = true;
-        target-dir = "/target";
-        packages = [
-          ":${../vm/xwaylandvideobridge.flatpak}"
-        ];
+        flatpak-dir = "/target";
       };
 
       xdg.portal = {
@@ -57,24 +54,27 @@ nixosTest {
         ];
         config.common.default = "*";
       };
-
-      virtualisation = {
-        cores = 8;
-        memorySize = 8096 * 2;
-        diskSize = 16 * 1024;
-      };
     };
-    custom_dirs = { config, pkgs, ... }: {
+    installation = { config, lib, pkgs, ... }: {
       imports = [
         modules.flatpak
       ];
 
-      networking.dhcpcd.enable = true;
-      
       services.flatpak = {
         enable = true;
-        state-dir = "/state";
-        target-dir = "/target";
+        flatpak-dir = "/target";
+        preRemotesCommand = ''
+          # I have to do this, because there's no internet in the vm
+          rm -rf $TARGET_DIR/repo
+          pushd $TARGET_DIR
+          PATH="$PATH:${lib.makeBinPath [ pkgs.gnutar pkgs.gzip ]}"
+          tar xf ${./predownloaded-repo.tar.gz}
+          popd
+        '';
+        packages = [
+          ":${../vm/xwaylandvideobridge.flatpak}"
+        ];
+        debug = true;
       };
 
       xdg.portal = {
@@ -92,11 +92,15 @@ nixosTest {
 
       services.flatpak = {
         enable = true;
-        target-dir = "/target";
+        flatpak-dir = "/target";
         UNCHECKEDpostEverythingCommand = ''
           touch /target/repo/thisfileshouldpersist
           touch /target/thisfileshouldnotpersist
         '';
+        packages = [
+          ":${../vm/xwaylandvideobridge.flatpak}"
+        ];
+        debug = true;
       };
 
       xdg.portal = {
@@ -117,24 +121,31 @@ nixosTest {
   
     bare.wait_for_unit("network-online.target")
     bare.succeed("which flatpak")
-    bare.succeed("systemctl status --no-pager manage-system-flatpaks.service")
+    bare.succeed("systemctl list-unit-files -l | grep 'manage-system-flatpaks'")
     bare.shutdown()
 
     custom_dirs.wait_for_unit("manage-system-flatpaks.service")
-    custom_dirs.wait_for_file("/state", timeout=60)
-    custom_dirs.wait_for_file("/target", timeout=60)
-    custom_dirs.succeed("stat /state")
-    custom_dirs.succeed("stat /target")
+    custom_dirs.wait_until_succeeds("stat /target", timeout=60)
     custom_dirs.shutdown()
+
+    installation.wait_for_unit("network-online.target")
+    installation.wait_for_unit("manage-system-flatpaks.service")
+    installation.wait_until_succeeds("stat /target/.module", timeout=120)
+    installation.wait_until_succeeds("stat /target/repo", timeout=120)
+    installation.wait_until_succeeds("stat /target/exports", timeout=120)
+    installation.succeed("stat /target/exports/bin/org.kde.xwaylandvideobridge")
+    installation.succeed("flatpak run --command=true org.kde.xwaylandvideobridge")
+    installation.fail("flatpak run --command=false org.kde.xwaylandvideobridge")
   
     persist.start(allow_reboot=True)
     persist.wait_for_unit("manage-system-flatpaks.service")
-    persist.wait_for_file("/target", timeout=60)
+    persist.wait_for_file("/target/repo", timeout=120)
+    # Added by POST hook, both should succeed
     persist.succeed("stat /target/repo/thisfileshouldpersist")
     persist.succeed("stat /target/thisfileshouldnotpersist")
     persist.reboot()
-    persist.wait_for_unit("manage-system-flatpaks.service")
-    persist.wait_for_file("/target", timeout=60)
+    persist.wait_until_succeeds("stat /target/.module/new", timeout=60)
+    persist.wait_until_fails("stat /target/.module/new", timeout=60)
     persist.succeed("stat /target/repo/thisfileshouldpersist")
     persist.fail("stat /target/thisfileshouldnotpersist")
     persist.shutdown()
