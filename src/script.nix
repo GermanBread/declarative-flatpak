@@ -151,22 +151,24 @@ writeShellScript "setup-flatpaks" ''
   cat ${callPackage ./pkgs/overrides.nix { inherit cfg ref; }} >"$TARGET_DIR/overrides/${ref}"
   '') (builtins.attrNames cfg.overrides))}
   
-  # First, make sure we didn't accidentally copy over the exports
-  rm -rf "$TARGET_DIR/processed-exports"
+  if [ -d "$TARGET_DIR/exports" ]; then
+    # First, make sure we didn't accidentally copy over the exports
+    rm -rf "$TARGET_DIR/processed-exports"
+    
+    # Dereference because exports are symlinks by default
+    rsync -aL "$TARGET_DIR/exports/" "$TARGET_DIR/processed-exports"
   
-  # Dereference because exports are symlinks by default
-  [ -d "$TARGET_DIR/exports" ] && rsync -aL $TARGET_DIR/exports/ $TARGET_DIR/processed-exports
-  
-  # Then begin "processing" the exports to make them point to the correct locations
-  [ -d "$TARGET_DIR/processed-exports/bin" ] && \
-    find "$TARGET_DIR/processed-exports/bin" \
-      -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm" '{}' \;
-  [ -d "$TARGET_DIR/processed-exports/share/applications" ] && \
-    find "$TARGET_DIR/processed-exports/share/applications" \
-      -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
-  
-  rm -rf "$TARGET_DIR/exports"
-  mv "$TARGET_DIR/processed-exports/" "$TARGET_DIR/exports"
+    # Then begin "processing" the exports to make them point to the correct locations
+    [ -d "$TARGET_DIR/processed-exports/bin" ] && \
+      find "$TARGET_DIR/processed-exports/bin" \
+        -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm" '{}' \;
+    [ -d "$TARGET_DIR/processed-exports/share/applications" ] && \
+      find "$TARGET_DIR/processed-exports/share/applications" \
+        -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
+    
+    rm -rf "$TARGET_DIR/exports"
+    mv "$TARGET_DIR/processed-exports/" "$TARGET_DIR/exports"
+  fi
 
   # Now we install/apply our changes
   find "$TARGET_DIR" -mindepth 1 -maxdepth 1 | while read r; do
