@@ -1,7 +1,7 @@
 | OPTION                         | DEFAULT   | TYPE               |
 |--------------------------------|-----------|--------------------|
 | enableModule                   | see below | `bool`             |
-| flatpak-dir                    | see below | `bool`             |
+| flatpak-dir                    | see below | `path` or `null`   |
 | packages                       | `[]`      | see below          |
 | remotes                        | `{}`      | see below          |
 | overrides                      | `{}`      | see below          |
