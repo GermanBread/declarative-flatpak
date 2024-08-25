@@ -12,3 +12,6 @@ Read [here](docs/branches.md) on how branches are named.
 
 > [!NOTE]
 > Your setup must be able to hold the size of your flatpak installation at least twice.
+
+> [!NOTE]
+> Contrary to popular belief, this module was never intended to implement "generational rollbacks". The *unique* directory layout was created to enable atomic updates for flatpak.
