@@ -8,7 +8,8 @@ Here is how you can import the [**NixOS** module](docs/nixos.md) and [**Home Man
 
 When imported, new options will be made available under `services.flatpak`. Please refer to the [**Module definition**](docs/definition.md) for configuration options.
 
-Read [here](docs/branches.md) on how branches are named.
+> [!IMPORTANT]
+> The stable branch is versioned. You will get notified when it gets obsoleted read [here](docs/branches.md) for more info.
 
 > [!NOTE]
 > Your setup must be able to hold the size of your flatpak installation at least twice.
