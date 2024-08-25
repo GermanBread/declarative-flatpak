@@ -161,10 +161,10 @@ writeShellScript "setup-flatpaks" ''
     # Then begin "processing" the exports to make them point to the correct locations
     [ -d "$TARGET_DIR/processed-exports/bin" ] && \
       find "$TARGET_DIR/processed-exports/bin" \
-        -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR exec flatpak run,gm" '{}' \;
+        -type f -exec sed -i "s,exec flatpak run,FLATPAK_USER_DIR=\"$FLATPAK_DIR\" FLATPAK_SYSTEM_DIR=\"$FLATPAK_DIR\" exec flatpak run,gm" '{}' \;
     [ -d "$TARGET_DIR/processed-exports/share/applications" ] && \
       find "$TARGET_DIR/processed-exports/share/applications" \
-        -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=$TARGET_DIR FLATPAK_SYSTEM_DIR=$TARGET_DIR flatpak run,gm" '{}' \;
+        -type f -exec sed -i "s,Exec=flatpak run,Exec=env FLATPAK_USER_DIR=\"$FLATPAK_DIR\" FLATPAK_SYSTEM_DIR=\"$FLATPAK_DIR\" flatpak run,gm" '{}' \;
     
     rm -rf "$TARGET_DIR/exports"
     mv "$TARGET_DIR/processed-exports/" "$TARGET_DIR/exports"
