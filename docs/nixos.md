@@ -3,7 +3,7 @@
   # Put the flatpak module in your inputs
   inputs = {
     # ... other imports ...
-    flatpaks.url = "github:GermanBread/declarative-flatpak/stable";
+    flatpaks.url = "github:GermanBread/declarative-flatpak/stable-v3";
     # Please DO NOT override the "nixpkgs" input!
     # Overriding "nixpkgs" is unsupported unless stated otherwise.
     # ... other imports ...
