@@ -27,8 +27,7 @@
 }
 ```
 > [!NOTE]
-> This example is not a fully functional config.
-It is rather a guide to show you where you should import the module in your `flake.nix`.
+> This example is not a fully functional config. It is rather a guide to show you where you should import the module in your `flake.nix`.
 
 > [!CAUTION]
 > Do not import the module inside `home.nix`
