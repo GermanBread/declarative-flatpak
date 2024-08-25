@@ -20,6 +20,7 @@ writeShellScript "setup-flatpaks" ''
   
   PATH=${makeBinPath [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ]}
   
+  ${if cfg.check-for-internet then ''
   # Failsafe
   _count=0
   until ping -c1 github.com &>/dev/null; do
@@ -32,6 +33,7 @@ writeShellScript "setup-flatpaks" ''
   done
   unset _count
   echo "Internet connected"
+  '' else ""}
 
   set -eu
 

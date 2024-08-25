@@ -139,6 +139,10 @@ in {
         Paths may not be escaped.
       '';
     };
+    check-for-internet = mkOption {
+      default = true;
+      type = bool;
+    };
     debug = mkEnableOption "Show more info.";
   };
 }
