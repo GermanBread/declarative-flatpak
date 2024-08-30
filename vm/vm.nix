@@ -20,6 +20,8 @@
       
       "launcher-moe:app/moe.launcher.honkers-launcher/x86_64/master"
 
+      "flathub:runtime/org.gtk.Gtk3theme.Breeze//3.22"
+
       "flathub:${./io.gitlab.daikhan.stable.flatpakref}"
       ":${./xwaylandvideobridge.flatpak}"
     ];

@@ -79,13 +79,14 @@ writeShellScript "setup-flatpaks" ''
 
   # "steal" the repo from last install
   if [ -d "$FLATPAK_DIR/repo" ] && [ ! -L "$FLATPAK_DIR/repo" ]; then
+    echo "Recycling existing repo..."
     cp -al "$FLATPAK_DIR/repo" "$TARGET_DIR/repo"
     ostree remote list --repo="$TARGET_DIR/repo" | while read r; do
       ostree remote delete --repo="$TARGET_DIR/repo" --if-exists $r
     done
     # needed for prune
-    rm -rf "$TARGET_DIR/repo/refs/heads/deploy"
-    rm -rf "$TARGET_DIR/repo/refs/remotes"/*
+    rm -rf "$TARGET_DIR/repo/refs/*"
+    rm -rf "$TARGET_DIR/repo/extensions"
   else
     ostree init --repo="$TARGET_DIR/repo" --mode=bare-user-only
   fi
