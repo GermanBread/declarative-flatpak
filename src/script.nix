@@ -154,6 +154,7 @@ writeShellScript "setup-flatpaks" ''
   cat ${callPackage ./pkgs/overrides.nix { inherit cfg ref; }} >"$TARGET_DIR/overrides/${ref}"
   '') (builtins.attrNames cfg.overrides))}
   
+  ${if cfg.flatpak-dir != null then ''
   if [ -d "$TARGET_DIR/exports" ]; then
     # First, make sure we didn't accidentally copy over the exports
     rm -rf "$TARGET_DIR/processed-exports"
@@ -172,6 +173,7 @@ writeShellScript "setup-flatpaks" ''
     rm -rf "$TARGET_DIR/exports"
     mv "$TARGET_DIR/processed-exports/" "$TARGET_DIR/exports"
   fi
+  '' else ""}
 
   # Now we install/apply our changes
   find "$TARGET_DIR" -mindepth 1 -maxdepth 1 | while read r; do
