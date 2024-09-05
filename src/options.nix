@@ -3,11 +3,13 @@
 { lib, pkgs, ... }:
 
 let
+  flatpak-types = callPackage ./lib/types/flatpak.nix {};
+  
   inherit (pkgs) callPackage;
   inherit (lib) mkOption mdDoc mkEnableOption;
   inherit (lib.types) listOf bool nullOr attrsOf path str submodule anything;
   
-  inherit ((callPackage ./lib/types.nix {}).types) fpkg fremote;
+  inherit (flatpak-types) fpkg fremote;
 in {
   imports = [
     ./renames.nix

@@ -5,9 +5,9 @@ let
   inherit (pkgs) coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils callPackage writeShellScript writeText;
   inherit (lib) makeBinPath;
 
+  inherit (import ./lib/regexes.nix) fcommit fref ffile fremote ftype farch fbranch;
   
   fargs = if is-system-install then [ "--system" ] else [ "--user" ] ++ extra-flatpak-flags;
-  regexes = (callPackage ./lib/types.nix {}).regexes;
   filecfg = writeText "flatpak-gen-config" (builtins.toJSON {
     inherit (cfg) overrides packages remotes flatpak-dir preRemotesCommand preInstallCommand preSwitchCommand;
   });
@@ -100,10 +100,10 @@ writeShellScript "setup-flatpaks" ''
 
   ${cfg.preInstallCommand}
 
-  for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${regexes.ffile}$" x == null) cfg.packages)}; do
-    _remote=$(grep -Eo '^${regexes.fremote}' <<< $i)
-    _id=$(grep -Eo '${regexes.ftype}/${regexes.fref}/${regexes.farch}/${regexes.fbranch}(:${regexes.fcommit})?' <<< $i)
-    _commit=$(grep -Eo ':${regexes.fcommit}$' <<< $_id) || true
+  for i in ${builtins.toString (builtins.filter (x: builtins.match ".+${ffile}$" x == null) cfg.packages)}; do
+    _remote=$(grep -Eo '^${fremote}' <<< $i)
+    _id=$(grep -Eo '${ftype}/${fref}/${farch}/${fbranch}(:${fcommit})?' <<< $i)
+    _commit=$(grep -Eo ':${fcommit}$' <<< $_id) || true
     if [ -n "$_commit" ]; then
       _commit=$(tail -c-$(($(wc -c <<< $_commit) - 1)) <<< $_commit)
       _id=$(head -c-$(($(wc -c <<< $_commit) + 1)) <<< $_id)
@@ -129,7 +129,7 @@ writeShellScript "setup-flatpaks" ''
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_id
   done
   for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpakref$" x != null) cfg.packages)}; do
-    _remote=$(grep -Eo '^${regexes.fremote}:' <<< $i | head -c-2)
+    _remote=$(grep -Eo '^${fremote}:' <<< $i | head -c-2)
     _id=$(grep -Eo ':.+\.flatpakref$' <<< $i | tail -c+2)
 
     flatpak ${builtins.toString fargs} install --noninteractive --no-auto-pin $_remote $_id
