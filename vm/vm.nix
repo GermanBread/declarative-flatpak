@@ -69,7 +69,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    tmux ncdu eza
+    tmux ncdu xdg-utils
   ];
 
   networking.networkmanager.enable = true;
