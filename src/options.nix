@@ -9,7 +9,7 @@ let
   inherit (lib) mkOption mdDoc mkEnableOption;
   inherit (lib.types) listOf bool nullOr attrsOf path str submodule anything;
   
-  inherit (flatpak-types) fpkg fremote;
+  inherit (flatpak-types) package remote;
 in {
   imports = [
     ./renames.nix
@@ -18,7 +18,7 @@ in {
   
   options.services.flatpak = {
     packages = mkOption {
-      type = listOf fpkg;
+      type = listOf package;
       default = [];
       example = [ "flathub:org.kde.index//stable" "flathub-beta:org.kde.kdenlive//stable" ];
       description = mdDoc ''
@@ -87,7 +87,7 @@ in {
       '';
     };
     remotes = mkOption {
-      type = fremote;
+      type = remote;
       default = {};
       example = ''
         services.flatpak.remotes = {
