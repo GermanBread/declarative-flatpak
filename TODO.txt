@@ -9,10 +9,11 @@
 ==> PLANNED <==
 
 [ ] option to block the boot process until all flatpaks have been installed
+[ ] do as much as possible without the flatpak cli, using ostree cli instead
 
 <-> WORKING ON IT <->
 
-[ ] do as much as possible without the flatpak cli, using ostree cli instead
+[ ] Fix whatever is causing Issue [#29](https://github.com/GermanBread/declarative-flatpak/issues/29)
 
 <|| DONE ||>
 
