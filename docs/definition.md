@@ -12,7 +12,7 @@
 
 ---
 
-# The "see below" part
+# The "see below"
 
 ## services.flatpak.**enableModule**
 ### Default
@@ -94,14 +94,20 @@ services.flatpak.overrides = {
   "global" = {
     filesystems = [
       "home"
-      "!~/Games/Heroic"
     ];
+    sockets = [
+      "!x11"
+      "!fallback-x11"
+    ];
+  };
+  "org.mozilla.Firefox" = {
     environment = {
       "MOZ_ENABLE_WAYLAND" = 1;
     };
     sockets = [
-      "!x11"
-      "fallback-x11"
+      "!wayland"
+      "!fallback-x11"
+      "x11"
     ];
   };
 }
@@ -114,7 +120,7 @@ Paths prefixed with '!' will deny read permissions for that path, also applies t
 Paths have to be escaped manually.
 
 > [!NOTE]
-> If you want to apply specialised overrides, do so by running commands via preSwitchCommand
+> If you want to apply overrides not supported in the module, do so by running the override commands in preSwitchCommand
 
 ## services.flatpak.**preRemotesCommand**
 ### Description
