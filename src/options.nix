@@ -4,11 +4,13 @@
 
 let
   flatpak-types = callPackage ./lib/types/flatpak.nix {};
+  ini-types = callPackage ./lib/types/ini.nix {};
   
   inherit (pkgs) callPackage;
   inherit (lib) mkOption mdDoc mkEnableOption;
   inherit (lib.types) listOf bool nullOr attrsOf path str submodule anything;
   
+  inherit (ini-types) ini;
   inherit (flatpak-types) package remote;
 in {
   imports = [
@@ -100,7 +102,7 @@ in {
       '';
     };
     overrides = mkOption {
-      type = attrsOf (submodule {
+      type = attrsOf (submodule ({ config, ... }: {
         options = {
           filesystems = mkOption {
             type = nullOr (listOf str);
@@ -114,8 +116,26 @@ in {
             type = nullOr (attrsOf anything);
             default = null;
           };
+
+          metadata = mkOption {
+            type = anything;
+            internal = true;
+          };
+          source = mkOption {
+            type = path;
+            internal = true;
+          };
         };
-      });
+        # Credit: https://github.com/PJungkamp #23 #25
+        config = {
+          metadata = {
+            Context = { inherit (config) filesystems sockets; };
+            Environment = config.environment;
+          };
+
+          source = ini.generate "flatpak-override-${config._module.args.name}" config.metadata;
+        };
+      }));
       default = {};
       example = ''
         services.flatpak.overrides = {

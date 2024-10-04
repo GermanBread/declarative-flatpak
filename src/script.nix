@@ -151,7 +151,7 @@ writeShellScript "setup-flatpaks" ''
   rm -rf "$TARGET_DIR/overrides"
   mkdir -p "$TARGET_DIR/overrides"
   ${builtins.concatStringsSep "\n" (builtins.map (ref: ''
-  cat ${callPackage ./pkgs/overrides.nix { inherit cfg ref; }} >"$TARGET_DIR/overrides/${ref}"
+  cat ${cfg.overrides.${ref}.source} >"$TARGET_DIR/overrides/${ref}"
   '') (builtins.attrNames cfg.overrides))}
   
   ${if cfg.flatpak-dir != null then ''
