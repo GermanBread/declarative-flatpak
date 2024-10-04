@@ -2,7 +2,7 @@
 , is-system-install, extra-flatpak-flags ? [] }:
 
 let
-  inherit (pkgs) coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils callPackage writeShellScript writeText;
+  inherit (pkgs) coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils writeShellScript writeText;
   inherit (lib) makeBinPath;
 
   inherit (import ./lib/regexes.nix) fcommit fref ffile fremote ftype farch fbranch;
