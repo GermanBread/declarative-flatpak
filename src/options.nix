@@ -22,7 +22,7 @@ in {
     packages = mkOption {
       type = listOf package;
       default = [];
-      example = [ "flathub:org.kde.index//stable" "flathub-beta:org.kde.kdenlive//stable" ];
+      example = [ "flathub:app/org.kde.index//stable" "flathub-beta:app/org.kde.kdenlive/x86_64/stable" ];
       description = mdDoc ''
         Which packages to install.
 
