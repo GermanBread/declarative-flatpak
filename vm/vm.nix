@@ -44,6 +44,9 @@
           "fallback-x11"
         ];
       };
+      "org.test.App" = {
+        # Intentionally leave out everything for bugfix
+      };
     };
     # flatpak-dir = "/flatpak";
     # debug = true;
