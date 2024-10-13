@@ -129,8 +129,11 @@ in {
         # Credit: https://github.com/PJungkamp #23 #25
         config = {
           metadata = {
-            Context = { inherit (config) filesystems sockets; };
-            Environment = config.environment;
+            Context = {
+              filesystems = if config.filesystems != null then config.filesystems else [];
+              sockets = if config.sockets != null then config.sockets else [];
+            };
+            Environment = if config.environment != null then config.environment else {};
           };
 
           source = ini.generate "flatpak-override-${config._module.args.name}" config.metadata;
