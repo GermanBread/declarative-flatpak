@@ -1,6 +1,6 @@
 { flatpak, ... }: {
   home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = false;
+  home-manager.useUserPackages = true;
   
   home-manager.users."user" = { config, ... }: {
     imports = [
@@ -18,6 +18,8 @@
       };
       # flatpak-dir = "${config.home.homeDirectory}/flatpak";
       # debug = true;
+      onCalendar = "hourly";
+      runOnActivation = true;
     };
 
     home.file.".zshrc".text = "";

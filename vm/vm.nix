@@ -10,6 +10,8 @@
     diskSize = 64 * 1024;
   };
 
+  boot.kernelParams = [ "loglevel=3" "quiet" ];
+
   services.flatpak = {
     packages = [ # comment these out at random
       "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud//21.08:9ee91f5c7944516169bb7a327d81ac7b08b149b3cd238b7a11a61bc1abe28ba9"
@@ -50,6 +52,8 @@
     };
     # flatpak-dir = "/flatpak";
     # debug = true;
+    runOnActivation = true;
+    onCalendar = "weekly";
   };
 
   # Dev env stuff

@@ -18,12 +18,12 @@ in
 
   config.systemd.user.services."manage-user-flatpaks" = mkIf cfg.enableModule {
     Unit = {
-      Wants = [
+      Wants = mkIf cfg.runOnActivation [
         "network.target"
       ];
     };
     Install = {
-      WantedBy = [
+      WantedBy = mkIf cfg.runOnActivation [
         "default.target"
       ];
     };
@@ -34,6 +34,22 @@ in
       }}";
     };
   };
+  config.systemd.user.timers."manage-user-flatpaks" = mkIf (cfg.enableModule && cfg.onCalendar != null) {
+    Unit = {
+      Wants = [
+        "network.target"
+      ];
+    };
+    Install = {
+      WantedBy = [
+        "default.target"
+      ];
+    };
+    Timer = {
+      OnCalendar = cfg.onCalendar;
+      Persistent = true;
+    };
+  };
 
   config.home.activation = mkIf cfg.enableModule {
     start-service = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -42,7 +58,11 @@ in
       $DRY_RUN_CMD systemctl is-system-running -q && \
         systemctl --user daemon-reload || true
       $DRY_RUN_CMD systemctl is-system-running -q && \
-        systemctl --user enable --now manage-user-flatpaks.service || true
+        systemctl --user enable manage-user-flatpaks || true
+      ${if cfg.onCalendar != null then ''
+      $DRY_RUN_CMD systemctl is-system-running -q && \
+        systemctl --user start manage-user-flatpaks || true
+      '' else ""}
     '';
   };
 
