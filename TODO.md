@@ -10,3 +10,4 @@
 1. opt-in telemetry for "stable" branch
 1. opt-out telemetry for "dev" branch
 1. Move flatpak refs into the Nix store
+1. How to make repo reuse faster?
