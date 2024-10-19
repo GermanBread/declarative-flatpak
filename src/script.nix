@@ -25,14 +25,14 @@ writeShellScript "setup-flatpaks" ''
   _count=0
   until ping -c1 github.com &>/dev/null; do
     if [ $_count -ge 60 ]; then
-      echo "Failed to acquire an internet connection in 60 seconds."
+      echo "failed to acquire an internet connection in 60 seconds."
       exit 1
     fi
     _count=$(($_count + 1))
     sleep 1
   done
   unset _count
-  echo "Internet connected"
+  echo "internet connected"
   '' else ""}
 
   set -eu
@@ -50,8 +50,8 @@ writeShellScript "setup-flatpaks" ''
   FLATPAK_DIR="${config.xdg.dataHome}/flatpak"
   ''}
 
-  # Now do some overrides
   ${if cfg.flatpakDir != null then ''
+  # user wishes for a separate flatpak dir
   FLATPAK_DIR=${cfg.flatpakDir}
   '' else ""}
 
@@ -78,23 +78,23 @@ writeShellScript "setup-flatpaks" ''
   mkdir -pm 755 "$TRASH_DIR"
 
   # "steal" the repo from last install
-  if [ -d "$FLATPAK_DIR/repo" ] && [ ! -L "$FLATPAK_DIR/repo" ]; then
-    echo "Recycling existing repo..."
+  if [ -d "$FLATPAK_DIR/repo" ]; then
+    echo "recycling existing repo..."
     cp -al "$FLATPAK_DIR/repo" "$TARGET_DIR/repo"
     ostree remote list --repo="$TARGET_DIR/repo" | while read r; do
-      ostree remote delete --repo="$TARGET_DIR/repo" --if-exists $r
+      ostree remote delete --repo="$TARGET_DIR/repo" --if-exists "$r"
     done
-    # needed for prune
     rm -rf "$TARGET_DIR/repo/refs/*"
     rm -rf "$TARGET_DIR/repo/extensions"
   else
+    [ -L "$TARGET_DIR/repo" ] && rm -f "$TARGET_DIR/repo"
     ostree init --repo="$TARGET_DIR/repo" --mode=bare-user-only
   fi
 
   ${cfg.preRemotesCommand}
 
   ${builtins.toString (builtins.attrValues (builtins.mapAttrs (name: value: ''
-  echo "Adding remote ${name} with URL ${value}"
+  echo "adding remote ${name} with URL ${value}"
   flatpak ${builtins.toString fargs} remote-add --if-not-exists ${name} ${value}
   '') cfg.remotes))}
 
@@ -122,7 +122,7 @@ writeShellScript "setup-flatpaks" ''
     fi
   done
 
-  echo "Installing out-of-tree refs"
+  echo "installing out-of-tree refs"
   for i in ${builtins.toString (builtins.filter (x: builtins.match ":.+\.flatpak$" x != null) cfg.packages)}; do
     _id=$(grep -Eo ':.+\.flatpak$' <<< $i | tail -c+2)
 
@@ -140,7 +140,7 @@ writeShellScript "setup-flatpaks" ''
   ostree prune --repo="$TARGET_DIR/repo" --refs-only
   ostree prune --repo="$TARGET_DIR/repo"
   
-  echo "Installing files"
+  echo "installing files"
   
   # Move the current installation into the bin
   find "$FLATPAK_DIR" -mindepth 1 -maxdepth 1 -not \( -name "$MODULE_PREFIX" -o -name 'db' \) | while read r; do
@@ -183,7 +183,7 @@ writeShellScript "setup-flatpaks" ''
 
   rm -rf "$TARGET_DIR"
 
-  ln -sfT ${filecfg} "$DATA_DIR/config"
+  ln -snfT ${filecfg} "$DATA_DIR/config"
 
   unset FLATPAK_USER_DIR FLATPAK_SYSTEM_DIR
 
