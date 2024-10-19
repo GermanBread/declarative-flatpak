@@ -9,7 +9,7 @@ let
   
   fargs = if is-system-install then [ "--system" ] else [ "--user" ] ++ extra-flatpak-flags;
   filecfg = writeText "flatpak-gen-config" (builtins.toJSON {
-    inherit (cfg) overrides packages remotes flatpak-dir preRemotesCommand preInstallCommand preSwitchCommand;
+    inherit (cfg) overrides packages remotes flatpakDir preRemotesCommand preInstallCommand preSwitchCommand;
   });
 in
 
@@ -20,7 +20,7 @@ writeShellScript "setup-flatpaks" ''
   
   PATH=${makeBinPath [ coreutils util-linux inetutils gnugrep flatpak gawk rsync ostree systemd findutils gnused diffutils ]}
   
-  ${if cfg.check-for-internet then ''
+  ${if cfg.waitForInternet then ''
   # Failsafe
   _count=0
   until ping -c1 github.com &>/dev/null; do
@@ -51,8 +51,8 @@ writeShellScript "setup-flatpaks" ''
   ''}
 
   # Now do some overrides
-  ${if cfg.flatpak-dir != null then ''
-  FLATPAK_DIR=${cfg.flatpak-dir}
+  ${if cfg.flatpakDir != null then ''
+  FLATPAK_DIR=${cfg.flatpakDir}
   '' else ""}
 
   DATA_DIR="$FLATPAK_DIR/$MODULE_PREFIX"
@@ -154,7 +154,7 @@ writeShellScript "setup-flatpaks" ''
   cat ${cfg.overrides.${ref}.source} >"$TARGET_DIR/overrides/${ref}"
   '') (builtins.attrNames cfg.overrides))}
   
-  ${if cfg.flatpak-dir != null then ''
+  ${if cfg.flatpakDir != null then ''
   if [ -d "$TARGET_DIR/exports" ]; then
     # First, make sure we didn't accidentally copy over the exports
     rm -rf "$TARGET_DIR/processed-exports"

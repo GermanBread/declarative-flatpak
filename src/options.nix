@@ -37,7 +37,7 @@ in {
         Enable/disable this module.
       '';
     };
-    flatpak-dir = mkOption {
+    flatpakDir = mkOption {
       type = nullOr path;
       default = null;
       description = mdDoc ''
@@ -164,10 +164,24 @@ in {
         Paths may not be escaped.
       '';
     };
-    check-for-internet = mkOption {
+    waitForInternet = mkOption {
       default = true;
       type = bool;
     };
+    runOnActivation = mkOption {
+      type = bool;
+      default = true;
+    };
+    onCalendar = mkOption {
+      type = nullOr str;
+      default = null;
+    };
     debug = mkEnableOption "Show more info.";
+  };
+
+  config = {
+    assertions = [
+      { assertion = cfg.runOnActivation || cfg.onCalendar != null; message = "Either onCalendar needs to be set or runOnActivation needs to be enabled"; }
+    ];
   };
 }
