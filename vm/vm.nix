@@ -50,7 +50,7 @@
         # Intentionally leave out everything for bugfix
       };
     };
-    # flatpak-dir = "/flatpak";
+    # flatpakDir = "/flatpak";
     # debug = true;
     runOnActivation = true;
     onCalendar = "weekly";
