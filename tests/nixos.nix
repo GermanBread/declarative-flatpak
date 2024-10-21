@@ -63,14 +63,9 @@ nixosTest {
       services.flatpak = {
         enable = true;
         flatpak-dir = "/target";
-        preRemotesCommand = ''
-          # I have to do this, because there's no internet in the vm
-          rm -rf $TARGET_DIR/repo
-          pushd $TARGET_DIR
-          PATH="$PATH:${lib.makeBinPath [ pkgs.gnutar pkgs.gzip ]}"
-          tar xf ${./predownloaded-repo.tar.gz}
-          popd
-        '';
+        remotes = {
+          "test" = ../vm/gol.launcher.moe.flatpakrepo;
+        };
         packages = [
           ":${../vm/xwaylandvideobridge.flatpak}"
         ];

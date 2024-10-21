@@ -30,7 +30,7 @@
     remotes = {
       "flathub" = "https://flathub.org/repo/flathub.flatpakrepo";
       "flathub-beta" = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
-      "launcher-moe" = "https://gol.launcher.moe/gol.launcher.moe.flatpakrepo";
+      "launcher-moe" = ./gol.launcher.moe.flatpakrepo;
     };
     overrides = {
       "org.mozilla.firefox" = {
