@@ -20,6 +20,8 @@
     };
   };
 
+  documentation.enable = false;
+
   services.flatpak = {
     enable = true;
     packages = [
