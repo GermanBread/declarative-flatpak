@@ -219,7 +219,7 @@ let
           _id="$(<"$ref"/id)"
           _commit="$(<"$ref"/commit)"
 
-          if ! flatpak update --noninteractive --commit="$_commit" "$_id"; then
+          if ! flatpak ${system-user-switch} update --noninteractive --commit="$_commit" "$_id"; then
             echo "Failed to update ref $_id to commit $_commit. Verify if the commit is correct"
             exit 1
           fi
